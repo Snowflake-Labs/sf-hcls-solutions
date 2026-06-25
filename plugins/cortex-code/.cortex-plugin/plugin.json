@@ -1,0 +1,6 @@
+{
+  "name": "sf-hcls-solutions",
+  "description": "Install pre-built Snowflake HCLS (Healthcare & Life Sciences) solutions into your account.",
+  "version": "1.0.0",
+  "author": "Snowflake Labs (Sho Tanaka)"
+}
