@@ -1,0 +1,39 @@
+# Medical Device Streaming Demo - Dependencies
+# ==========================================
+# Python 3.11+ Required (for optimal performance & features)
+
+# Core Snowflake Integration
+snowflake-connector-python>=3.13.0
+snowflake-snowpark-python>=1.23.0
+
+# HTTP and API
+requests>=2.32.3
+
+# Data Science & Analysis
+pandas>=2.2.2
+numpy>=1.26.4
+neurokit2>=0.2.10
+scikit-learn>=1.5.0
+scipy>=1.14.0
+
+# Visualization
+matplotlib>=3.9.0
+plotly>=5.24.0
+streamlit>=1.38.0
+altair>=5.4.0
+
+# Authentication & Security
+PyJWT[crypto]>=2.9.0
+cryptography>=43.0.0
+
+# Configuration & Environment
+python-dotenv>=1.0.1
+
+# JSON Processing (enhanced)
+json5>=0.9.25
+
+# Time zone handling (optimized for Python 3.11)
+pytz>=2024.1
+
+# TOML support (built-in in Python 3.11, but keeping for compatibility)
+tomli>=2.0.1; python_version < "3.11" 

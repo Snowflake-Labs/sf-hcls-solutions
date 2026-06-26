@@ -71,6 +71,40 @@ SELECT PARSE_JSON(
 - In Claude Code CLI, use `snow sql -q "PUT file://... @DB.SCHEMA.STAGE/ AUTO_COMPRESS=FALSE OVERWRITE=TRUE;"`.
 - Always use `AUTO_COMPRESS=FALSE` for `.py` and `.yml` files.
 
+### Streamlit Deployment (CREATE STREAMLIT)
+
+**CRITICAL: "App not found" bug and correct deploy pattern:**
+
+The following pattern causes "App not found" in Snowsight (the app doesn't appear in the Streamlit Apps dashboard):
+
+```sql
+-- WRONG: ROOT_LOCATION syntax without ADD LIVE VERSION
+CREATE OR REPLACE STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME>
+    ROOT_LOCATION = '@SF_SOLUTIONS.<SCHEMA>.STREAMLIT_STAGE'
+    MAIN_FILE = 'streamlit_app.py'
+    QUERY_WAREHOUSE = SF_SOLUTIONS_WH;
+```
+
+**Correct pattern** (proven to work, same as `ltv-prediction`):
+
+```sql
+-- CORRECT: FROM syntax + ADD LIVE VERSION
+CREATE OR REPLACE STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME>
+    FROM '@SF_SOLUTIONS.<SCHEMA>.STREAMLIT_STAGE'
+    MAIN_FILE = 'streamlit_app.py'
+    QUERY_WAREHOUSE = SF_SOLUTIONS_WH;
+
+ALTER STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME> ADD LIVE VERSION FROM LAST;
+```
+
+**Rules:**
+1. Use `FROM '@STAGE'` syntax (NOT `ROOT_LOCATION`)
+2. ALWAYS run `ALTER STREAMLIT ... ADD LIVE VERSION FROM LAST;` after CREATE — without this, the app exists as metadata but is NOT visible in the Streamlit Apps dashboard
+3. Files MUST be on the stage BEFORE `CREATE STREAMLIT` — if PUT was skipped or failed, the app will show "App not found"
+4. Do NOT put `CREATE STREAMLIT` in `setup.sql` — use a separate `deploy_streamlit.sql` script executed by the SKILL.md installer AFTER PUT succeeds
+5. Always verify with `SHOW STREAMLITS IN SCHEMA ...` before displaying the URL
+6. Always verify with `LIST @STAGE` that files are uploaded before creating the Streamlit object
+
 ### Snowflake SQL Reserved Words
 
 - `SAMPLE` is a reserved word — cannot be used as a CTE name or alias. Use `top_customers`, `sample_data`, etc.
@@ -301,6 +335,7 @@ Reference when creating new solutions to avoid schema name conflicts and to foll
 | Solution | Industry | Database | Schemas | Key Features |
 |----------|----------|----------|---------|--------------|
 | clinical-quality-agent | Healthcare | SF_SOLUTIONS | CLINICAL_QUALITY_SAFETY | CoWork, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model |
+| medical-device-streaming | Healthcare | SF_SOLUTIONS | MEDICAL_DEVICE_CLINICAL, MEDICAL_DEVICE_TELEMETRY | Snowpipe Streaming, PIPE Objects, ASOF Joins, VARIANT, Flattened Views |
 
 Notes:
 - All solutions use `SF_SOLUTIONS` database.

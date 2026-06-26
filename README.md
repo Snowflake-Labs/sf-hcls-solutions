@@ -11,6 +11,7 @@ End-to-end solution accelerators for the Healthcare & Life Sciences industry ver
 | # | Solution | Industry | Directory | Key Snowflake Features | Status |
 |---|----------|----------|-----------|----------------------|--------|
 | 1 | **Clinical Quality and Patient Safety Agent** | Healthcare | `solutions/clinical-quality-agent/` | Snowflake Intelligence, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model | ✅ Done |
+| 2 | **Medical Device Streaming Platform** | Healthcare | `solutions/medical-device-streaming/` | Snowpipe Streaming (High-Performance), PIPE Objects, ASOF Joins, VARIANT Data, Flattened Views | ✅ Done |
 
 ---
 
@@ -74,6 +75,45 @@ solutions/<solution-name>/
 - Snowflake account (Enterprise edition recommended)
 - Appropriate role with CREATE DATABASE / SCHEMA privileges
 - Warehouse (default: `COMPUTE_WH`)
+
+---
+
+## Developers for Plugin
+
+If you're contributing new solutions to this repository, use the `add-solution` skill to convert existing repos into the standard plugin format.
+
+### Setup
+
+Clone the repo and run Cortex Code from within it:
+
+```bash
+git clone https://github.com/Snowflake-Labs/sf-hcls-solutions.git
+cd sf-hcls-solutions
+cortex
+```
+
+### Convert an Existing Solution
+
+In the Cortex Code session, invoke the add-solution skill with the path to the source repo:
+
+```
+$add-solution ../my-existing-solution-repo
+```
+
+This will:
+1. Analyze the source repo (detect SQL-only, Python-only, or hybrid)
+2. Extract all DDL into `scripts/setup.sql` and `scripts/teardown.sql`
+3. Generate `manifest.json` and `README.md`
+4. Create plugin skills for both Cortex Code and Claude Code
+5. Audit for credentials and Snowflake internal info
+6. Validate with linters (sqruff, ruff, markdownlint)
+
+### Available Developer Skills
+
+| Skill | Invocation | Purpose |
+|-------|-----------|---------|
+| add-solution | `$add-solution <path>` | Convert an existing repo into plugin format |
+| list | `$sf-hcls-solutions:list` | List all registered solutions |
 
 ---
 

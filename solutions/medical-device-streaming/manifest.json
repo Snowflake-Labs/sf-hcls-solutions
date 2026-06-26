@@ -1,0 +1,30 @@
+{
+  "name": "medical-device-streaming",
+  "display_name": "Medical Device Streaming Platform",
+  "version": "1.0.0",
+  "industry": "Healthcare & Life Sciences",
+  "description": "Real-time medical device data streaming platform demonstrating Snowflake High-Performance Snowpipe Streaming for ECG, EDA, and PPG biosignal data with live analytics using ASOF joins and flattened views.",
+  "database": "SF_SOLUTIONS",
+  "schemas": ["MEDICAL_DEVICE_CLINICAL", "MEDICAL_DEVICE_TELEMETRY"],
+  "role": "ACCOUNTADMIN",
+  "requires_warehouse": true,
+  "requires_marketplace": [
+    {
+      "name": "Synthetic Healthcare Data - Clinical and Claims",
+      "url": "https://app.snowflake.com/marketplace/listing/GZSTZL7M0Q6/snowflake-virtual-hands-on-labs-synthetic-healthcare-data-clinical-and-claims",
+      "required": false,
+      "note": "Optional. Provides patient demographics for advanced analytics. The streaming platform works without it."
+    }
+  ],
+  "install_scripts": ["scripts/setup.sql"],
+  "teardown_scripts": ["scripts/teardown.sql"],
+  "features": [
+    "Snowpipe Streaming (High-Performance)",
+    "PIPE Objects",
+    "ASOF Joins",
+    "VARIANT Data (Semi-structured)",
+    "Flattened Views",
+    "Dual-Schema Architecture"
+  ],
+  "notes": "Snowflake infrastructure is deployed via setup.sql. The optional Python streaming client (in app/) generates realistic biosignal data and requires local Python 3.11+, RSA key pair authentication, and an AWS-based Snowflake account with high-performance streaming preview enabled."
+}
