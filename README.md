@@ -11,6 +11,7 @@ End-to-end solution accelerators for the Healthcare & Life Sciences industry ver
 | # | Solution | Industry | Directory | Key Snowflake Features | Status |
 |---|----------|----------|-----------|----------------------|--------|
 | 1 | **Clinical Quality and Patient Safety Agent** | Healthcare | `solutions/clinical-quality-agent/` | Snowflake Intelligence, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model | ✅ Done |
+| 2 | **Medical Device Streaming** | Healthcare | `solutions/medical-device-streaming/` | Snowpipe Streaming (High-Performance), ASOF Joins, Flattened Views, Streamlit Dashboard | ✅ Done |
 
 ---
 
@@ -19,14 +20,12 @@ End-to-end solution accelerators for the Healthcare & Life Sciences industry ver
 Install any solution using the Cortex Code plugin:
 
 ```bash
-# Permanent install (copies plugin to cache — survives restarts)
-cortex plugin install https://github.com/Snowflake-Labs/sf-hcls-solutions.git
+# TBA: Public install (available after repo goes public)
+# cortex plugin install https://github.com/Snowflake-Labs/sf-hcls-solutions.git
 
-# Or load locally during development (reads directly from disk, always up-to-date)
+# Local development (reads directly from disk, always up-to-date)
 cortex --plugin-dir ./plugins/cortex-code
 ```
-
-> **Note:** `cortex plugin install` copies the plugin into a local cache. If you add new skills later, you must `cortex plugin uninstall sf-hcls-solutions && cortex plugin install ...` to refresh. During development, use `--plugin-dir` instead — it always reads the latest files from disk without caching.
 
 Then in a Cortex Code session, run a solution by name:
 
@@ -43,10 +42,10 @@ $sf-hcls-solutions:clinical-quality-agent teardown
 ## Quick Install (via Claude Code)
 
 ```bash
-# Add the marketplace
-claude plugin marketplace add https://github.com/Snowflake-Labs/sf-hcls-solutions.git --path plugins/claude-code
+# TBA: Public install (available after repo goes public)
+# claude plugin marketplace add https://github.com/Snowflake-Labs/sf-hcls-solutions.git --path plugins/claude-code
 
-# Or load locally during development
+# Local development (reads directly from disk, always up-to-date)
 claude --plugin-dir ./plugins/claude-code
 ```
 
