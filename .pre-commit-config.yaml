@@ -14,6 +14,22 @@ repos:
             args: [--config, .markdownlint.yaml, --ignore-path, .markdownlintignore]
             types: [markdown]
 
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.11.12
+      hooks:
+          - id: ruff
+            args: [--fix]
+          - id: ruff-format
+
+    - repo: local
+      hooks:
+          - id: sqruff
+            name: sqruff (SQL linter)
+            language: system
+            entry: uvx sqruff lint
+            types: [sql]
+            pass_filenames: false
+
     - repo: local
       hooks:
           - id: no-code-in-skills

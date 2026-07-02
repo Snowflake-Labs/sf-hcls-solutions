@@ -1,0 +1,53 @@
+{
+  "patient_profiles": {
+    "standard_set": [
+      {
+        "patient_id": "1229701",
+        "condition": "NORMAL",
+        "heart_rate": 72,
+        "stress_level": 0.3
+      },
+      {
+        "patient_id": "1229702", 
+        "condition": "HIGH_STRESS",
+        "heart_rate": 85,
+        "stress_level": 0.6
+      },
+      {
+        "patient_id": "1229704",
+        "condition": "TACHYCARDIA", 
+        "heart_rate": 110,
+        "stress_level": 0.4
+      },
+      {
+        "patient_id": "1229709",
+        "condition": "BRADYCARDIA",
+        "heart_rate": 55,
+        "stress_level": 0.2
+      },
+      {
+        "patient_id": "1229737",
+        "condition": "NORMAL_ATHLETE",
+        "heart_rate": 60,
+        "stress_level": 0.1
+      }
+    ]
+  },
+  "patient_sets": {
+    "standard": {
+      "description": "5 patients for basic demo (300+ rec/sec)",
+      "patient_count": 5,
+      "use_profiles": "standard_set"
+    },
+    "high_performance": {
+      "description": "5 patients for high-performance demo (25K rec/sec)",
+      "patient_count": 5,
+      "use_profiles": "standard_set"
+    },
+    "ultra_performance": {
+      "description": "5 patients for ultra-performance demo (100K rec/sec)",
+      "patient_count": 5,
+      "use_profiles": "standard_set"
+    }
+  }
+} 
