@@ -110,7 +110,3 @@ SET trend_degradation = 0.06;       -- 6% quarterly worsening
 ## Teardown
 
 Execute `scripts/teardown.sql` to remove all solution objects.
-
-## License
-
-MIT
