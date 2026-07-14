@@ -17,47 +17,18 @@ End-to-end solution accelerators for the Healthcare & Life Sciences industry ver
 
 ## Quick Install (via Cortex Code)
 
-Install any solution using the Cortex Code plugin:
+Solutions are installed via the `$sf-solutions` skill in [snowflake-ai-kit](https://github.com/Snowflake-Labs/snowflake-ai-kit):
 
 ```bash
-# Permanent install (copies plugin to cache — survives restarts)
-# TBA: Public install (available after repo goes public) cortex plugin install "Snowflake-Labs/sf-hcls-solutions/plugins/cortex-code"
-
-# Or load locally during development (reads directly from disk, always up-to-date)
-git clone git@github.com:Snowflake-Labs/sf-hcls-solutions.git
-cd sf-hcls-solutions
-cortex --plugin-dir ./plugins/cortex-code
+# Install the snowflake-ai-kit plugin (includes sf-solutions skill)
+cortex skill add github:Snowflake-Labs/snowflake-ai-kit
 ```
-
-> **Note:** `cortex plugin install` copies the plugin into a local cache. If you add new skills later, you must `cortex plugin uninstall sf-hcls-solutions && cortex plugin install ...` to refresh. During development, use `--plugin-dir` instead — it always reads the latest files from disk without caching.
 
 Then in a Cortex Code session, run a solution by name:
 
 ```
-$sf-hcls-solutions:<solution-name>
-```
-
-Example:
-```
-$sf-hcls-solutions:clinical-quality-agent
-$sf-hcls-solutions:clinical-quality-agent teardown
-```
-
-## Quick Install (via Claude Code)
-
-```bash
-# TBA: Public install (available after repo goes public)
-
-# Add the marketplace
-# claude plugin marketplace add https://github.com/Snowflake-Labs/sf-hcls-solutions.git --path plugins/claude-code
-
-# Or load locally during development
-claude --plugin-dir ./plugins/claude-code
-```
-
-Then in a Claude Code session, run a solution by name:
-```
-/sf-hcls-solutions:clinical-quality-agent
+$sf-solutions:clinical-quality-agent
+$sf-solutions:clinical-quality-agent teardown
 ```
 
 ---
@@ -71,6 +42,7 @@ solutions/<solution-name>/
 ├── README.md          # Overview, architecture, prerequisites
 ├── manifest.json      # Solution metadata for the installer
 ├── scripts/           # SQL setup and teardown scripts
+├── NEXT_ACTIONS.md    # Post-install guidance
 └── data/              # Sample data generation scripts (if applicable)
 ```
 
@@ -82,13 +54,11 @@ solutions/<solution-name>/
 
 ---
 
-## Developers for Plugin
+## Developers
 
-If you're contributing new solutions to this repository, use the `add-solution` skill to convert existing repos into the standard plugin format.
-
-### Setup
-
-Clone the repo and run Cortex Code from within it:
+If you're contributing new solutions to this repository, use the `add-solution` skill
+from [sf-solutions](https://github.com/Snowflake-Labs/sf-solutions) to convert
+existing repos into the standard format.
 
 ```bash
 git clone https://github.com/Snowflake-Labs/sf-hcls-solutions.git
@@ -96,28 +66,10 @@ cd sf-hcls-solutions
 cortex
 ```
 
-### Convert an Existing Solution
-
-In the Cortex Code session, invoke the add-solution skill with the path to the source repo:
-
+Then invoke:
 ```
 $add-solution ../my-existing-solution-repo
 ```
-
-This will:
-1. Analyze the source repo (detect SQL-only, Python-only, or hybrid)
-2. Extract all DDL into `scripts/setup.sql` and `scripts/teardown.sql`
-3. Generate `manifest.json` and `README.md`
-4. Create plugin skills for both Cortex Code and Claude Code
-5. Audit for credentials and Snowflake internal info
-6. Validate with linters (sqruff, ruff, markdownlint)
-
-### Available Developer Skills
-
-| Skill | Invocation | Purpose |
-|-------|-----------|---------|
-| add-solution | `$add-solution <path>` | Convert an existing repo into plugin format |
-| list | `$sf-hcls-solutions:list` | List all registered solutions |
 
 ---
 
