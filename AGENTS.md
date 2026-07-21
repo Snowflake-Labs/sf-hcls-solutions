@@ -169,8 +169,7 @@ solutions/<name>/
 
 When demo data exceeds ~200 lines, extract it into a separate `data.sql` file. This prevents CoCo CLI context overflow and allows direct execution via `snow sql -f scripts/data.sql`.
 
-Plugin skills (SKILL.md) have been moved to [snowflake-ai-kit](https://github.com/Snowflake-Labs/snowflake-ai-kit).
-Solutions are installed via `$sf-solutions:<name>` from that plugin.
+The installer plugin is TBA (pending public release). This repo contains only the solution source code and metadata.
 
 ### Snowsight URL Patterns
 

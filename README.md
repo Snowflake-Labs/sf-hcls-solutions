@@ -17,18 +17,13 @@ End-to-end solution accelerators for the Healthcare & Life Sciences industry ver
 
 ## Quick Install (via Cortex Code)
 
-Solutions are installed via the `$sf-solutions` skill in [snowflake-ai-kit](https://github.com/Snowflake-Labs/snowflake-ai-kit):
-
-```bash
-# Install the snowflake-ai-kit plugin (includes sf-solutions skill)
-cortex skill add github:Snowflake-Labs/snowflake-ai-kit
-```
-
-Then in a Cortex Code session, run a solution by name:
+> **TBA** — Plugin install command will be available after public release.
 
 ```
-$sf-solutions:clinical-quality-agent
-$sf-solutions:clinical-quality-agent teardown
+$sf-solutions                              # List all available solutions
+$sf-solutions hcls                         # Filter by HCLS industry
+$sf-solutions:clinical-quality-agent       # Install a solution
+$sf-solutions:clinical-quality-agent teardown  # Remove a solution
 ```
 
 ---
@@ -41,9 +36,9 @@ Each solution is self-contained in its own directory with:
 solutions/<solution-name>/
 ├── README.md          # Overview, architecture, prerequisites
 ├── manifest.json      # Solution metadata for the installer
+├── NEXT_ACTIONS.md    # Post-install verification steps and example queries
 ├── scripts/           # SQL setup and teardown scripts
-├── NEXT_ACTIONS.md    # Post-install guidance
-└── data/              # Sample data generation scripts (if applicable)
+└── streamlit/         # Streamlit app (if applicable)
 ```
 
 ## Prerequisites
@@ -51,25 +46,6 @@ solutions/<solution-name>/
 - Snowflake account (Enterprise edition recommended)
 - Appropriate role with CREATE DATABASE / SCHEMA privileges
 - Warehouse (default: `COMPUTE_WH`)
-
----
-
-## Developers
-
-If you're contributing new solutions to this repository, use the `add-solution` skill
-from [sf-solutions](https://github.com/Snowflake-Labs/sf-solutions) to convert
-existing repos into the standard format.
-
-```bash
-git clone https://github.com/Snowflake-Labs/sf-hcls-solutions.git
-cd sf-hcls-solutions
-cortex
-```
-
-Then invoke:
-```
-$add-solution ../my-existing-solution-repo
-```
 
 ---
 
