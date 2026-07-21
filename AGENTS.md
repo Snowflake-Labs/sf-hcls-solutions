@@ -169,20 +169,7 @@ solutions/<name>/
 
 When demo data exceeds ~200 lines, extract it into a separate `data.sql` file. This prevents CoCo CLI context overflow and allows direct execution via `snow sql -f scripts/data.sql`.
 
-Plugin skills mirror this at:
-- `plugins/cortex-code/skills/<name>/SKILL.md` + `NEXT_ACTIONS.md`
-- `plugins/claude-code/skills/<name>/SKILL.md` + `NEXT_ACTIONS.md`
-
-### Skill Invocation Prefixes
-
-The two supported AI CLI platforms use different trigger characters:
-
-| Platform | Prefix | Example |
-|----------|--------|---------|
-| Cortex Code | `$` | `$sf-hcls-solutions:clinical-quality-agent` |
-| Claude Code CLI | `/` | `/sf-hcls-solutions:clinical-quality-agent` |
-
-When writing SKILL.md files, always use the correct prefix for the target platform in usage help and examples.
+The installer plugin is TBA (pending public release). This repo contains only the solution source code and metadata.
 
 ### Snowsight URL Patterns
 
@@ -243,7 +230,6 @@ All PRs must pass:
 1. **markdownlint** — all `*.md` files
 2. **sqruff** — all `*.sql` files (`--format github-annotation-native`)
 3. **ruff check + format** — all `*.py` files
-4. **skills-purity** — no code files (`.py`, `.sql`) inside `skills/` directories
 
 ### Local Pre-commit Hooks
 
@@ -257,7 +243,8 @@ pre-commit install --hook-type commit-msg
 This enables:
 - **check-json** — validates `.json` files
 - **markdownlint** — lints `.md` files
-- **no-code-in-skills** — ensures `skills/` contains only `.md`, `.json`, `.yaml`, `.yml`
+- **ruff** — Python lint + format
+- **sqruff** — SQL lint
 - **conventional-pre-commit** — enforces [Conventional Commits](https://www.conventionalcommits.org/) message format
 
 Commit messages must use one of: `feat`, `fix`, `chore`, `docs`, `refactor`, `ci`, `test`.
@@ -282,7 +269,6 @@ Include the following checklist in PR descriptions. All items must pass before m
 - [ ] `ruff format --check` passes
 - [ ] `sqruff lint` passes (all `.sql` files)
 - [ ] `markdownlint` passes (all `.md` files)
-- [ ] `skills-purity` passes (no `.py`/`.sql` in `skills/` dirs)
 
 ### Setup / Teardown (manual)
 - [ ] `scripts/setup.sql` completes successfully as ACCOUNTADMIN
@@ -319,10 +305,8 @@ Include the following checklist in PR descriptions. All items must pass before m
 
 ## Test Plan
 - [ ] Verify `uv run sqruff lint solutions/<solution-name>/scripts/` passes
-- [ ] Run `$sf-hcls-solutions:<solution-name>` in Cortex Code to confirm install works
-- [ ] Run `$sf-hcls-solutions:<solution-name> teardown` in Cortex Code to confirm teardown works
-- [ ] Run `/sf-hcls-solutions:<solution-name>` to confirm install in Claude Code
-- [ ] Run `/sf-hcls-solutions:<solution-name> teardown` to confirm teardown works in Claude Code
+- [ ] Run `$sf-solutions:<solution-name>` in Cortex Code to confirm install works
+- [ ] Run `$sf-solutions:<solution-name> teardown` to confirm teardown works
 
 ## Screenshots
 <!-- SiS runtime screenshots if UI changes are included -->
