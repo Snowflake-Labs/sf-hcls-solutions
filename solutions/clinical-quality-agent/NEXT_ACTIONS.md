@@ -9,6 +9,56 @@ description: >
 
 After installation, guide the user through these progressive steps.
 
+## Enable PubMed Medical Literature Search (Optional, Free)
+
+The agent is installed without PubMed to ensure it works on all accounts.
+To add medical literature search, follow these steps.
+
+**Step 1 — Install PubMed from Marketplace (UI required):**
+
+1. In Snowsight, go to **Data Products > Marketplace**
+2. Search for **"PubMed Biomedical Research Corpus"**
+   - Direct link: `https://app.snowflake.com/marketplace/listing/GZTYZ4386LY/cybersyn-pubmed-biomedical-research-corpus`
+3. Click **Get** and accept the terms
+4. Keep the database name as **`PUBMED_BIOMEDICAL_RESEARCH_CORPUS`** (default)
+5. Verify it's available:
+   ```sql
+   SHOW CORTEX SEARCH SERVICES IN SCHEMA PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM;
+   ```
+   You should see `PUBMED_OA_CKE_SEARCH_SERVICE` in the results.
+
+> **Note:** Marketplace listings require UI interaction (terms acceptance).
+> There is no pure SQL equivalent for the initial `Get` step.
+
+**Step 2 — Add PubMed tool to the agent via ALTER AGENT:**
+
+```sql
+USE ROLE ACCOUNTADMIN;
+USE DATABASE SF_SOLUTIONS;
+USE SCHEMA CLINICAL_QUALITY_SAFETY;
+
+ALTER AGENT clinical_quality_safety_agent ADD TOOL PUBMED_SEARCH_SERVICE
+  FROM SPECIFICATION
+  $$
+  tool_spec:
+    type: cortex_search
+    name: PUBMED_SEARCH_SERVICE
+    description: "This contains data from NCBI Pubmed - PubMed comprises more than 38 million citations for biomedical literature from MEDLINE, life science journals, and online books."
+  tool_resources:
+    PUBMED_SEARCH_SERVICE:
+      name: "PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM.PUBMED_OA_CKE_SEARCH_SERVICE"
+      max_results: 4
+      id_column: "ARTICLE_URL"
+      title_column: "ARTICLE_CITATION"
+  $$;
+```
+
+**Step 3 — Test PubMed search:**
+```
+Find PubMed articles on preventing CAUTI infections
+What does recent research say about reducing hospital-acquired infections?
+```
+
 ## Quick Exploration (5 min)
 
 1. **Open the Cortex Agent**
