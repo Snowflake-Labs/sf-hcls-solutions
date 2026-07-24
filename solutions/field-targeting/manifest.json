@@ -1,0 +1,29 @@
+{
+  "name": "field-targeting",
+  "display_name": "HCLS Field Targeting Platform",
+  "version": "1.0.0",
+  "description": "Pharmaceutical HCP field targeting platform for Zenixar PsO demonstrating Cortex AI (SENTIMENT, CLASSIFY_TEXT), Semantic View for Cortex Analyst, and a Streamlit what-if scenario dashboard for rules-engine-based call planning.",
+  "industry": "Healthcare & Life Sciences",
+  "database": "SF_SOLUTIONS",
+  "schemas": ["FIELD_TARGETING"],
+  "warehouse": "SF_SOLUTIONS_WH",
+  "features": [
+    "Cortex AI (SENTIMENT, CLASSIFY_TEXT)",
+    "Semantic View (Cortex Analyst)",
+    "Streamlit What-If Dashboard",
+    "9-Step Rules Engine (via skills)",
+    "HCP Microsegmentation",
+    "Call Planning & Territory Balancing",
+    "Promotional Materials Analytics"
+  ],
+  "tables": {
+    "source": ["HCP_MASTER_PROFILE", "HCP_SUPPRESSION_FLAGS", "BRAND_EXCLUSION_LIST", "RX_WEEKLY_HCP", "HCP_MICROSEGMENT", "CALL_ACTIVITY"],
+    "reference": ["RESPONSE_CURVE", "TERRITORY_DIM", "SALES_REPS", "REP_TERRITORY_DIM", "PROMO_MATERIALS_CATALOG"],
+    "derived": ["CALL_NOTES_RAW", "CALL_NOTES_ENRICHED", "CALL_MATERIAL_USAGE"]
+  },
+  "views": ["MATERIAL_EFFECTIVENESS"],
+  "streamlit": "SF_SOLUTIONS.FIELD_TARGETING.FIELD_TARGETING_DASHBOARD",
+  "semantic_view": "solutions/field-targeting/semantic_view/HCP_UNIVERSE_SV.yaml",
+  "status": "done",
+  "role_required": "ACCOUNTADMIN"
+}
