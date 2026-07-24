@@ -26,9 +26,9 @@ Parse the action from `$ARGUMENTS`:
 - **Industry:** Healthcare & Life Sciences
 - **Database:** SF_SOLUTIONS
 - **Schema:** CLINICAL_QUALITY_SAFETY
-- **Features:** Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model, Snowflake CoWork
+- **Features:** Cortex Agent, Cortex Analyst, Semantic Model, Snowflake CoWork
 - **Role Required:** ACCOUNTADMIN
-- **Optional Marketplace Dataset:** PubMed Biomedical Research Corpus (free, strongly recommended)
+- **Optional Marketplace Dataset:** PubMed Biomedical Research Corpus — can be added after install (see NEXT_ACTIONS.md)
 
 ## Install
 
@@ -50,7 +50,8 @@ Parse the action from `$ARGUMENTS`:
    What will be created:
      - 8 clinical quality tables (75K patients with realistic data)
      - Semantic model for Cortex Analyst (text-to-SQL)
-     - Cortex Agent with Analyst + PubMed Search + Email tools
+     - Cortex Agent with Analyst + Email tools
+     - PubMed Search tool can be added after install (see NEXT_ACTIONS.md)
      - Accessible via Snowflake Intelligence UI
 
    Optional prerequisite:
@@ -63,15 +64,7 @@ Parse the action from `$ARGUMENTS`:
 
 4. Wait for user confirmation.
 
-5. Check if PubMed dataset is installed:
-   ```sql
-   SHOW CORTEX SEARCH SERVICES IN SCHEMA PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM;
-   ```
-   - If available: inform user that PubMed search will be enabled
-   - If not available: inform user the Agent will work without literature search, and suggest installing PubMed from Marketplace:
-     `https://app.snowflake.com/marketplace/listing/GZTYZ4386LY/cybersyn-pubmed-biomedical-research-corpus`
-
-6. Read `solutions/clinical-quality-agent/scripts/setup.sql` and execute it.
+5. Read `solutions/clinical-quality-agent/scripts/setup.sql` and execute it.
 
    **CRITICAL SESSION CONSTRAINT:** This script uses `SET` session variables (e.g., `$num_patients`, `$mortality_multiplier`) that the data generation INSERT statements depend on. These variables MUST persist within the same session.
 
@@ -83,12 +76,12 @@ Parse the action from `$ARGUMENTS`:
 
    Log progress after each major section.
 
-7. **Upload semantic model YAML (CRITICAL — agent won't work without this):**
+6. **Upload semantic model YAML (CRITICAL — agent won't work without this):**
 
-   Step 7a — Locate the YAML file:
+   Step 6a — Locate the YAML file:
    - `solutions/clinical-quality-agent/scripts/semantic_model.yaml`
 
-   Step 7b — Upload to stage via PUT:
+   Step 6b — Upload to stage via PUT:
    ```sql
    PUT file://<repo_path>/solutions/clinical-quality-agent/scripts/semantic_model.yaml
        @SF_SOLUTIONS.CLINICAL_QUALITY_SAFETY.SEMANTIC_MODEL_STAGE
@@ -101,25 +94,25 @@ Parse the action from `$ARGUMENTS`:
    PUT file:///tmp/semantic_model.yaml @SF_SOLUTIONS.CLINICAL_QUALITY_SAFETY.SEMANTIC_MODEL_STAGE AUTO_COMPRESS=FALSE OVERWRITE=TRUE;
    ```
 
-   Step 7c — Verify the file is on stage:
+   Step 6c — Verify the file is on stage:
    ```sql
    LIST @SF_SOLUTIONS.CLINICAL_QUALITY_SAFETY.SEMANTIC_MODEL_STAGE;
    ```
    You MUST see `semantic_model.yaml`. If not, retry PUT before proceeding.
 
-   Step 7d — Execute `solutions/clinical-quality-agent/scripts/deploy_agent.sql`:
+   Step 6d — Execute `solutions/clinical-quality-agent/scripts/deploy_agent.sql`:
    This creates the Cortex Agent. Execute it as a SINGLE call (the agent spec is one statement):
    ```sql
    -- Execute full deploy_agent.sql contents as one statement
    ```
 
-   Step 7e — Verify agent was created:
+   Step 6e — Verify agent was created:
    ```sql
    SHOW AGENTS IN SCHEMA SF_SOLUTIONS.CLINICAL_QUALITY_SAFETY;
    ```
    You MUST see `CLINICAL_QUALITY_SAFETY_AGENT` in the output.
 
-8. Verify table data:
+7. Verify table data:
    ```sql
    SELECT TABLE_SCHEMA, TABLE_NAME, ROW_COUNT
    FROM SF_SOLUTIONS.INFORMATION_SCHEMA.TABLES
@@ -127,7 +120,7 @@ Parse the action from `$ARGUMENTS`:
    ORDER BY TABLE_NAME;
    ```
 
-9. **[MANDATORY — DO NOT SKIP]** Show the Snowflake Intelligence Agent URL.
+8. **[MANDATORY — DO NOT SKIP]** Show the Snowflake Intelligence Agent URL.
    Execute this query:
    ```sql
    SELECT 'https://app.snowflake.com/'
@@ -144,7 +137,7 @@ Parse the action from `$ARGUMENTS`:
 
    This step is NON-OPTIONAL. The user must always see the Agent URL after install.
 
-10. Show final summary:
+9. Show final summary:
     ```
     Installation complete: Clinical Quality and Patient Safety Agent v1.0.0
 
@@ -157,7 +150,7 @@ Parse the action from `$ARGUMENTS`:
     1. Open the Cortex Agent URL above in Snowflake CoWork
     2. Try: "How many patients died in the last year?"
     3. Try: "Show me catheter infections that resulted in death"
-    4. Try: "Search PubMed for CAUTI prevention" (requires PubMed dataset)
+    4. Add PubMed medical literature search (see NEXT_ACTIONS.md)
 
     Teardown: $sf-hcls-solutions:clinical-quality-agent teardown
     ```

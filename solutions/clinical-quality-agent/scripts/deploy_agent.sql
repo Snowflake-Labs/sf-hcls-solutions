@@ -17,7 +17,7 @@ USE SCHEMA CLINICAL_QUALITY_SAFETY;
 USE WAREHOUSE SF_SOLUTIONS_WH;
 
 CREATE OR REPLACE AGENT clinical_quality_safety_agent
-  COMMENT = 'Clinical Quality and Patient Safety Agent with Cortex Analyst, PubMed Search, and Email capabilities'
+  COMMENT = 'Clinical Quality and Patient Safety Agent with Cortex Analyst and Email capabilities'
   PROFILE = '{"display_name": "Clinical Quality Assistant", "avatar": "healthcare-icon.png", "color": "blue"}'
   FROM SPECIFICATION
   $$
@@ -88,11 +88,6 @@ CREATE OR REPLACE AGENT clinical_quality_safety_agent
           This healthcare quality analytics semantic model enables comprehensive analysis of patient outcomes, mortality, infections, and safety events across hospital admissions in the SF_SOLUTIONS database. The model centers on hospital admissions with realistic clinical relationships connecting patient demographics, diagnoses, procedures, healthcare-associated infections, and patient outcomes to support quality improvement initiatives. It includes detailed tracking of preventable deaths, device-associated infections (CAUTI, CLABSI, VAP), patient safety events, and risk factors with age-appropriate comorbidity patterns reflecting typical hospital populations where 65% of patients are over 65. The interconnected tables enable analysis of infection-mortality relationships, procedure complications, readmission patterns, and quality metrics essential for Chief Quality Officers to identify improvement opportunities and measure healthcare quality performance. Key analytical capabilities include mortality rate analysis, infection control metrics, patient safety event tracking, and risk-stratified outcome prediction across all major clinical domains.
 
     - tool_spec:
-        type: cortex_search
-        name: PUBMED_SEARCH_SERVICE
-        description: "This contains data from NCBI Pubmed - PubMed comprises more than 38 million citations for biomedical literature from MEDLINE, life science journals, and online books."
-
-    - tool_spec:
         type: generic
         name: email_send
         description: |
@@ -138,11 +133,6 @@ CREATE OR REPLACE AGENT clinical_quality_safety_agent
         type: warehouse
         warehouse: SF_SOLUTIONS_WH
         query_timeout: 100
-    PUBMED_SEARCH_SERVICE:
-      name: "PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM.PUBMED_OA_CKE_SEARCH_SERVICE"
-      max_results: 4
-      id_column: "ARTICLE_URL"
-      title_column: "ARTICLE_CITATION"
     email_send:
       type: procedure
       identifier: "SF_SOLUTIONS.CLINICAL_QUALITY_SAFETY.EMAIL_CONNECTOR"
