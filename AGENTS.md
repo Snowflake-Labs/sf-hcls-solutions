@@ -320,6 +320,7 @@ Reference when creating new solutions to avoid schema name conflicts and to foll
 |----------|----------|----------|---------|--------------|
 | clinical-quality-agent | Healthcare | SF_SOLUTIONS | CLINICAL_QUALITY_SAFETY | CoWork, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model |
 | medical-device-streaming | Healthcare | SF_SOLUTIONS | MEDICAL_DEVICE_CLINICAL, MEDICAL_DEVICE_TELEMETRY | Snowpipe Streaming, PIPE Objects, ASOF Joins, VARIANT, Flattened Views |
+| field-targeting | Healthcare & Life Sciences | SF_SOLUTIONS | FIELD_TARGETING | Cortex AI (SENTIMENT, CLASSIFY_TEXT), Semantic View, Streamlit What-If, Rules Engine |
 
 Notes:
 - All solutions use `SF_SOLUTIONS` database.
