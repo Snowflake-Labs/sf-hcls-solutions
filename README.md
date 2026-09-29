@@ -1,8 +1,12 @@
 # Snowflake HCLS Industry Solutions
 
+Disclaimer: This application is not part of the Snowflake Service and is governed by the terms in LICENSE, unless expressly agreed to in writing. You use this application at your own risk, and Snowflake has no obligation to support your use of this application. [Learn more](./LEGAL.md)
+
 **HCLS: Healthcare & Life Sciences**
 
 End-to-end solution accelerators for the Healthcare & Life Sciences industry vertical, built on Snowflake and Cortex Code, showcasing Cortex AI, Snowflake ML, and the modern data platform.
+
+This repository is part of the [Snowflake Industry Solutions](https://github.com/Snowflake-Labs/sf-solutions) catalogue — a central hub for discovering, installing, and managing all industry solution accelerators across verticals.
 
 ## Requirements
 
@@ -37,15 +41,33 @@ $sf-solutions:clinical-quality-agent teardown  # Remove a solution
 
 ## Getting Started
 
-Each solution is self-contained in its own directory with:
+Each solution is self-contained in its own directory. There are two types:
+
+### Script Type
 
 ```
 solutions/<solution-name>/
+├── manifest.json      # Solution metadata (type: "script")
 ├── README.md          # Overview, architecture, prerequisites
-├── manifest.json      # Solution metadata for the installer
 ├── NEXT_ACTIONS.md    # Post-install verification steps and example queries
 ├── scripts/           # SQL setup and teardown scripts
 └── streamlit/         # Streamlit app (if applicable)
+```
+
+### Plugin Type
+
+Solutions that install a Cortex Code plugin with skills, agents, and optionally Snowflake objects.
+
+```
+solutions/<solution-name>/
+├── manifest.json          # Solution metadata (type: "plugin")
+├── README.md              # Overview, usage
+├── plugins/cortex-code/   # CoCo plugin directory
+│   ├── .cortex-plugin/
+│   │   └── plugin.json
+│   └── skills/
+│       └── ...
+└── scripts/               # Optional SQL scripts
 ```
 
 ---
