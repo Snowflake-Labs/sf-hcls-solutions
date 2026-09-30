@@ -1,0 +1,562 @@
+name: HCP_UNIVERSE_SV
+description: Pharmaceutical field targeting model for Acme Pharma Zenixar (psoriasis).
+  Contains the eligible HCP universe with tier assignments (T1=highest priority through
+  T4 and NT=non-target), prescription volumes (brand and market TRx), composite scoring,
+  territory assignments, call planning data, and workload balancing information. Also
+  includes promotional material (PromoMats) usage tracking linked to calls, with material
+  catalog metadata and effectiveness metrics. Used by field operations to understand
+  HCP prioritization, territory workload, targeting decisions, and material effectiveness.
+tables:
+  - name: HCP_ELIGIBLE_UNIVERSE
+    base_table:
+      database: SF_SOLUTIONS
+      schema: FIELD_TARGETING
+      table: HCP_ELIGIBLE_UNIVERSE
+    primary_key:
+      columns:
+        - MDM_ID
+    dimensions:
+      - name: MDM_ID
+        expr: MDM_ID
+        data_type: VARCHAR
+        description: Master Data Management unique identifier for each HCP
+        synonyms:
+          - master data id
+          - hcp id
+          - physician id
+      - name: CUST_ID
+        expr: CUST_ID
+        data_type: VARCHAR
+        description: Customer identifier
+        synonyms:
+          - customer id
+      - name: INT_HCP_ID
+        expr: INT_HCP_ID
+        data_type: VARCHAR
+        description: Acme Pharma internal identifier
+        synonyms:
+          - acme_pharma id
+      - name: HCP_REG_NUM
+        expr: HCP_REG_NUM
+        data_type: VARCHAR
+        description: National Provider Identifier number
+        synonyms:
+          - provider registration number
+          - national provider identifier
+      - name: SPEC_CD
+        expr: SPEC_CD
+        data_type: VARCHAR
+        description: Medical specialty code
+        synonyms:
+          - specialty code
+      - name: SPEC_DESC
+        expr: SPEC_DESC
+        data_type: VARCHAR
+        description: Medical specialty description (e.g. Dermatology, Rheumatology)
+        synonyms:
+          - specialty
+          - medical specialty
+        sample_values:
+          - Dermatology
+          - Rheumatology
+          - Internal Medicine
+      - name: ZIP_CD
+        expr: ZIP_CD
+        data_type: VARCHAR
+        description: ZIP code of HCP practice location
+        synonyms:
+          - zip code
+          - zip
+      - name: STATE
+        expr: STATE
+        data_type: VARCHAR
+        description: US state of HCP practice location
+        synonyms:
+          - state code
+      - name: TERR_ID
+        expr: TERR_ID
+        data_type: VARCHAR
+        description: Sales territory identifier
+        synonyms:
+          - territory id
+          - territory code
+      - name: TERR
+        expr: TERR
+        data_type: VARCHAR
+        description: Sales territory name
+        synonyms:
+          - territory name
+          - territory
+      - name: FF_ID
+        expr: FF_ID
+        data_type: VARCHAR
+        description: Field force representative identifier
+        synonyms:
+          - rep id
+          - field force id
+      - name: FF_NM
+        expr: FF_NM
+        data_type: VARCHAR
+        description: Field force representative name
+        synonyms:
+          - rep name
+          - field force name
+          - sales rep
+      - name: BASE_TIER
+        expr: BASE_TIER
+        data_type: VARCHAR
+        description: Initial tier assignment before refinement rules (T1, T2, T3, T4)
+        synonyms:
+          - base tier
+          - initial tier
+        sample_values:
+          - T1
+          - T2
+          - T3
+          - T4
+      - name: REFINED_TIER
+        expr: REFINED_TIER
+        data_type: VARCHAR
+        description: Final tier assignment after all refinement rules applied. T1=highest priority, T4=lowest, NT=non-target
+        synonyms:
+          - tier
+          - final tier
+          - refined tier
+        sample_values:
+          - T1
+          - T2
+          - T3
+          - T4
+          - NT
+      - name: COMPETITOR_SEGMENT
+        expr: COMPETITOR_SEGMENT
+        data_type: VARCHAR
+        description: Competitor prescribing segment classification
+        synonyms:
+          - competitor segment
+          - competitive segment
+      - name: TERR_TOTAL_CALLS
+        expr: TERR_TOTAL_CALLS
+        data_type: NUMBER
+        description: Total planned calls in the territory for the quarter
+        synonyms:
+          - territory total calls
+          - total calls
+      - name: TARGET_STATUS
+        expr: TARGET_STATUS
+        data_type: VARCHAR
+        description: Whether HCP is included in the call plan. 'target' means included, 'non-target' means excluded
+        synonyms:
+          - target status
+          - targeting status
+          - targeted
+        sample_values:
+          - target
+          - non-target
+      - name: BALANCE_ACTION
+        expr: BALANCE_ACTION
+        data_type: VARCHAR
+        description: Workload balancing action taken (e.g. promoted, trimmed, none)
+        synonyms:
+          - balancing action
+      - name: BALANCE_REASON
+        expr: BALANCE_REASON
+        data_type: VARCHAR
+        description: Reason for workload balancing action
+        synonyms:
+          - balancing reason
+      - name: PRODUCT
+        expr: PRODUCT
+        data_type: VARCHAR
+        description: Product being promoted (Zenixar)
+        synonyms:
+          - brand
+          - drug
+      - name: POSITION
+        expr: POSITION
+        data_type: VARCHAR
+        description: Position or priority of the product in the call plan
+      - name: INDICATION
+        expr: INDICATION
+        data_type: VARCHAR
+        description: Therapeutic indication (e.g. Psoriasis)
+        synonyms:
+          - therapeutic area
+          - disease area
+    facts:
+      - name: RX_BRAND_TRX
+        expr: RX_BRAND_TRX
+        data_type: FLOAT
+        description: Sentinel brand prescriptions (TRx)
+        synonyms:
+          - sentinel brand trx
+      - name: RX_MARKET_TRX
+        expr: RX_MARKET_TRX
+        data_type: FLOAT
+        description: Sentinel market prescriptions (TRx)
+        synonyms:
+          - sentinel market trx
+      - name: LEGACY_BRAND_TRX
+        expr: LEGACY_BRAND_TRX
+        data_type: FLOAT
+        description: Factored brand prescriptions (TRx). Always 0 — FCT data source excluded (contains a legacy product, not Zenixar)
+        synonyms:
+          - factored brand trx
+      - name: LEGACY_MARKET_TRX
+        expr: LEGACY_MARKET_TRX
+        data_type: FLOAT
+        description: Factored market prescriptions (TRx). Always 0 — FCT data source excluded (contains a legacy product, not Zenixar)
+        synonyms:
+          - factored market trx
+      - name: BRAND_TRX_12M
+        expr: BRAND_TRX_12M
+        data_type: FLOAT
+        description: Rolling 12-month brand prescription volume (TRx)
+        synonyms:
+          - brand trx
+          - brand prescriptions
+          - brand volume
+          - annual brand trx
+      - name: MARKET_TRX_12M
+        expr: MARKET_TRX_12M
+        data_type: FLOAT
+        description: Rolling 12-month market prescription volume (TRx)
+        synonyms:
+          - market trx
+          - market prescriptions
+          - market volume
+          - annual market trx
+      - name: BRAND_PCTILE
+        expr: BRAND_PCTILE
+        data_type: FLOAT
+        description: Brand TRx percentile rank (0-100)
+        synonyms:
+          - brand percentile
+      - name: MARKET_PCTILE
+        expr: MARKET_PCTILE
+        data_type: FLOAT
+        description: Market TRx percentile rank (0-100)
+        synonyms:
+          - market percentile
+      - name: COMPOSITE_SCORE
+        expr: COMPOSITE_SCORE
+        data_type: FLOAT
+        description: Weighted composite score combining brand and market percentiles for tier assignment
+        synonyms:
+          - score
+          - composite
+          - hcp score
+      - name: CARS_SCORE
+        expr: CARS_SCORE
+        data_type: FLOAT
+        description: CARS (Competitive Activity and Response Score) measuring competitive prescribing opportunity
+        synonyms:
+          - cars
+          - competitive score
+      - name: GTN_NET_SCORE
+        expr: GTN_NET_SCORE
+        data_type: FLOAT
+        description: Gross-to-Net score measuring rebate/discount impact
+        synonyms:
+          - gtn score
+          - gross to net
+      - name: KOL_RANK
+        expr: KOL_RANK
+        data_type: FLOAT
+        description: Key Opinion Leader ranking score (1-100 scale, threshold 60 for up-tiering)
+        synonyms:
+          - kol
+          - key opinion leader rank
+      - name: CALLS_PER_QTR
+        expr: CALLS_PER_QTR
+        data_type: NUMBER
+        description: Assigned number of sales calls per quarter for this HCP
+        synonyms:
+          - call frequency
+          - calls per quarter
+          - quarterly calls
+      - name: INCREMENTAL_RX_EST
+        expr: INCREMENTAL_RX_EST
+        data_type: FLOAT
+        description: Estimated incremental prescriptions from targeting this HCP
+        synonyms:
+          - incremental rx
+          - incremental prescriptions
+      - name: TERR_CPD
+        expr: TERR_CPD
+        data_type: NUMBER
+        description: Territory calls per day. Healthy range is 2.5-4.0
+        synonyms:
+          - calls per day
+          - cpd
+          - territory cpd
+    metrics:
+      - name: total_hcps
+        expr: COUNT(MDM_ID)
+        description: Total number of HCPs
+        synonyms:
+          - hcp count
+          - physician count
+          - number of hcps
+      - name: total_brand_trx
+        expr: SUM(BRAND_TRX_12M)
+        description: Total 12-month brand prescription volume
+        synonyms:
+          - total brand volume
+          - total brand prescriptions
+      - name: avg_composite_score
+        expr: AVG(COMPOSITE_SCORE)
+        description: Average composite score across HCPs
+        synonyms:
+          - average score
+          - mean composite score
+      - name: avg_brand_trx
+        expr: AVG(BRAND_TRX_12M)
+        description: Average 12-month brand prescription volume per HCP
+        synonyms:
+          - average brand trx
+          - mean brand volume
+      - name: total_incremental_rx
+        expr: SUM(INCREMENTAL_RX_EST)
+        description: Total estimated incremental prescriptions from targeting
+        synonyms:
+          - total incremental prescriptions
+          - incremental rx total
+  - name: CALL_MATERIAL_USAGE
+    base_table:
+      database: SF_SOLUTIONS
+      schema: FIELD_TARGETING
+      table: CALL_MATERIAL_USAGE
+    dimensions:
+      - name: MATERIAL_ID
+        expr: MATERIAL_ID
+        data_type: VARCHAR
+        description: Unique identifier for the promotional material
+        synonyms:
+          - material code
+          - promo material id
+      - name: USAGE_TYPE
+        expr: USAGE_TYPE
+        data_type: VARCHAR
+        description: How the material was used - Presented, Left-Behind, E-Sent, or Sampled
+        synonyms:
+          - material usage type
+          - how material was used
+        sample_values:
+          - Presented
+          - Left-Behind
+          - E-Sent
+          - Sampled
+      - name: REACTION
+        expr: REACTION
+        data_type: VARCHAR
+        description: HCP reaction to the material - Positive, Neutral, Negative, or Not Observed
+        synonyms:
+          - hcp reaction
+          - material reaction
+          - physician response
+        sample_values:
+          - Positive
+          - Neutral
+          - Negative
+          - Not Observed
+      - name: MATERIAL_CALL_DATE
+        expr: CALL_DATE
+        data_type: DATE
+        description: Date the material was used during a call
+        synonyms:
+          - material use date
+    facts:
+      - name: MATERIAL_USAGE_COUNT
+        expr: "1"
+        data_type: NUMBER
+        description: Count of material usage instances (each row = 1 use)
+        synonyms:
+          - uses
+          - times used
+    metrics:
+      - name: total_material_uses
+        expr: COUNT(*)
+        description: Total number of times materials were used across all calls
+        synonyms:
+          - material use count
+          - total uses
+      - name: positive_reaction_rate
+        expr: "SUM(CASE WHEN REACTION = 'Positive' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)"
+        description: Percentage of material uses that received a positive reaction from HCPs
+        synonyms:
+          - positive rate
+          - positive reaction percentage
+      - name: unique_hcps_reached
+        expr: COUNT(DISTINCT MDM_ID)
+        description: Number of unique HCPs who received promotional materials
+        synonyms:
+          - hcps reached
+          - unique physicians with materials
+  - name: PROMO_MATERIALS_CATALOG
+    base_table:
+      database: SF_SOLUTIONS
+      schema: FIELD_TARGETING
+      table: PROMO_MATERIALS_CATALOG
+    primary_key:
+      columns:
+        - MATERIAL_ID
+    dimensions:
+      - name: MATERIAL_NAME
+        expr: MATERIAL_NAME
+        data_type: VARCHAR
+        description: Name of the promotional material (e.g. Zenixar SKIN90 Detail Aid)
+        synonyms:
+          - material
+          - promo material
+          - content name
+      - name: MATERIAL_TYPE
+        expr: MATERIAL_TYPE
+        data_type: VARCHAR
+        description: Category of material - Detail Aid, Leave-Behind, Reprint, Patient Brochure, Sample Kit, Speaker Deck, Digital Aid, Video
+        synonyms:
+          - material category
+          - content type
+          - promo type
+        sample_values:
+          - Detail Aid
+          - Leave-Behind
+          - Reprint
+          - Patient Brochure
+          - Sample Kit
+      - name: MATERIAL_INDICATION
+        expr: INDICATION
+        data_type: VARCHAR
+        description: Therapeutic indication the material targets
+        synonyms:
+          - material indication
+        sample_values:
+          - PsO
+          - PsA
+          - General
+      - name: APPROVAL_STATUS
+        expr: APPROVAL_STATUS
+        data_type: VARCHAR
+        description: Regulatory/MLR approval status of the material
+        synonyms:
+          - approval state
+          - material status
+        sample_values:
+          - Approved
+          - Expired
+          - Under Review
+      - name: TARGET_AUDIENCE
+        expr: TARGET_AUDIENCE
+        data_type: VARCHAR
+        description: Intended physician audience for the material
+        synonyms:
+          - intended audience
+          - who is this material for
+        sample_values:
+          - Dermatologist
+          - Rheumatologist
+          - General
+      - name: KEY_MESSAGE
+        expr: KEY_MESSAGE
+        data_type: VARCHAR
+        description: Primary promotional message of the material
+        synonyms:
+          - key selling point
+          - main message
+      - name: CLINICAL_STUDY_REF
+        expr: CLINICAL_STUDY_REF
+        data_type: VARCHAR
+        description: Clinical study referenced by this material
+        synonyms:
+          - study reference
+          - clinical trial
+        sample_values:
+          - VERTEX-1
+          - VERTEX-2
+          - APEX-PsO
+      - name: LIFECYCLE_STAGE
+        expr: LIFECYCLE_STAGE
+        data_type: VARCHAR
+        description: Current lifecycle stage of the material
+        synonyms:
+          - material lifecycle
+        sample_values:
+          - Active
+          - Retired
+          - Draft
+relationships:
+  - name: material_usage_to_catalog
+    left_table: CALL_MATERIAL_USAGE
+    right_table: PROMO_MATERIALS_CATALOG
+    join_type: many_to_one
+    relationship_columns:
+      - left_column: MATERIAL_ID
+        right_column: MATERIAL_ID
+  - name: material_usage_to_universe
+    left_table: CALL_MATERIAL_USAGE
+    right_table: HCP_ELIGIBLE_UNIVERSE
+    join_type: many_to_one
+    relationship_columns:
+      - left_column: MDM_ID
+        right_column: MDM_ID
+verified_queries:
+  - name: tier_distribution
+    question: How many healthcare providers are in each tier?
+    sql: SELECT REFINED_TIER, COUNT(*) AS hcp_count FROM hcp_eligible_universe GROUP
+      BY REFINED_TIER ORDER BY REFINED_TIER
+    verified_at: 1773423334
+    verified_by: Semantic Model Generator
+  - name: targeted_hcps_by_state
+    question: How many targeted healthcare providers are in each state and what is
+      their total brand prescription volume?
+    sql: SELECT STATE, COUNT(*) AS hcp_count, SUM(BRAND_TRX_12M) AS total_brand_trx
+      FROM hcp_eligible_universe WHERE TARGET_STATUS = 'target' GROUP BY STATE ORDER
+      BY total_brand_trx DESC
+    verified_at: 1773423334
+    verified_by: Semantic Model Generator
+  - name: top_territories_by_targets
+    question: Which territories have the most targeted healthcare providers and what
+      are their average composite scores?
+    sql: SELECT TERR_ID, TERR, COUNT(*) AS hcp_count, ROUND(AVG(COMPOSITE_SCORE),
+      2) AS avg_score, ROUND(MAX(TERR_CPD), 2) AS cpd FROM hcp_eligible_universe WHERE
+      TARGET_STATUS = 'target' GROUP BY TERR_ID, TERR ORDER BY hcp_count DESC LIMIT
+      20
+    verified_at: 1773423334
+    verified_by: Semantic Model Generator
+  - name: tier_by_specialty
+    question: What is the tier distribution by specialty?
+    sql: SELECT SPEC_DESC, REFINED_TIER, COUNT(*) AS hcp_count FROM hcp_eligible_universe
+      GROUP BY SPEC_DESC, REFINED_TIER ORDER BY SPEC_DESC, REFINED_TIER
+    verified_at: 1773423334
+    verified_by: Semantic Model Generator
+  - name: top_t1_hcps
+    question: Who are the top 10 highest priority healthcare providers based on their
+      composite scores?
+    sql: SELECT MDM_ID, SPEC_DESC, STATE, TERR_ID, BRAND_TRX_12M, COMPOSITE_SCORE,
+      REFINED_TIER, CARS_SCORE FROM hcp_eligible_universe WHERE REFINED_TIER = 'T1'
+      ORDER BY COMPOSITE_SCORE DESC LIMIT 10
+    verified_at: 1773423334
+    verified_by: Semantic Model Generator
+  - name: target_vs_nontarget
+    question: What is the breakdown of healthcare providers by target status showing
+      their brand prescription volumes?
+    sql: SELECT TARGET_STATUS, COUNT(*) AS hcp_count, ROUND(SUM(BRAND_TRX_12M), 0)
+      AS total_brand_trx, ROUND(AVG(BRAND_TRX_12M), 2) AS avg_brand_trx FROM hcp_eligible_universe
+      GROUP BY TARGET_STATUS
+    verified_at: 1773423334
+    verified_by: Semantic Model Generator
+  - name: material_usage_by_type
+    question: What are the most used promotional materials by type?
+    sql: SELECT m.MATERIAL_TYPE, m.MATERIAL_NAME, COUNT(*) AS usage_count, COUNT(DISTINCT u.MDM_ID) AS unique_hcps FROM CALL_MATERIAL_USAGE u JOIN PROMO_MATERIALS_CATALOG m ON u.MATERIAL_ID = m.MATERIAL_ID GROUP BY m.MATERIAL_TYPE, m.MATERIAL_NAME ORDER BY usage_count DESC
+    verified_at: 1747540800
+    verified_by: Semantic Model Generator
+  - name: material_reaction_summary
+    question: What is the reaction rate for each promotional material?
+    sql: SELECT m.MATERIAL_NAME, COUNT(*) AS total_uses, ROUND(SUM(CASE WHEN u.REACTION = 'Positive' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS pct_positive, ROUND(SUM(CASE WHEN u.REACTION = 'Negative' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS pct_negative FROM CALL_MATERIAL_USAGE u JOIN PROMO_MATERIALS_CATALOG m ON u.MATERIAL_ID = m.MATERIAL_ID GROUP BY m.MATERIAL_NAME ORDER BY pct_positive DESC
+    verified_at: 1747540800
+    verified_by: Semantic Model Generator
+  - name: top_materials_for_tier
+    question: Which materials are most used for T1 healthcare providers?
+    sql: SELECT m.MATERIAL_NAME, m.MATERIAL_TYPE, COUNT(*) AS usage_count, ROUND(SUM(CASE WHEN u.REACTION = 'Positive' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS pct_positive FROM CALL_MATERIAL_USAGE u JOIN PROMO_MATERIALS_CATALOG m ON u.MATERIAL_ID = m.MATERIAL_ID JOIN HCP_ELIGIBLE_UNIVERSE h ON u.MDM_ID = h.MDM_ID WHERE h.REFINED_TIER = 'T1' GROUP BY m.MATERIAL_NAME, m.MATERIAL_TYPE ORDER BY usage_count DESC LIMIT 10
+    verified_at: 1747540800
+    verified_by: Semantic Model Generator
