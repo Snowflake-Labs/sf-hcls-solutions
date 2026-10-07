@@ -19,7 +19,10 @@ This repository is part of the [Snowflake Industry Solutions](https://github.com
 
 | # | Solution | Industry | Directory | Key Snowflake Features | Status |
 |---|----------|----------|-----------|----------------------|--------|
-<!-- Add solutions here -->
+<!-- REPO_SPECIFIC_START: solution-catalog -->
+| 1 | **Clinical Quality and Patient Safety Agent** | Healthcare | `solutions/clinical-quality-agent/` | Snowflake Intelligence, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model | ✅ Done |
+| 2 | **Medical Device Streaming Platform** | Healthcare | `solutions/medical-device-streaming/` | Snowpipe Streaming (High-Performance), PIPE Objects, ASOF Joins, VARIANT Data, Flattened Views | ✅ Done |
+<!-- REPO_SPECIFIC_END: solution-catalog -->
 
 ---
 

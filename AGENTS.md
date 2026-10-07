@@ -145,6 +145,15 @@ ALTER STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME> ADD LIVE VERSION FROM LAST;
 - If such a workflow is listed in a ruleset as a required status check, the PR gets stuck on "Waiting for status to be reported" forever.
 - **Fix:** Remove `paths:` from the workflow trigger and add an early-exit check inside the job (e.g., "No SQL files found — skipping").
 
+<!-- REPO_SPECIFIC_START: known-issues -->
+
+### HCLS-specific notes
+
+- In Claude Code CLI, use `snow sql -q "PUT file://... @DB.SCHEMA.STAGE/ AUTO_COMPRESS=FALSE OVERWRITE=TRUE;"`.
+- Streamlit: Do NOT put `CREATE STREAMLIT` in `setup.sql` — use a separate `deploy_streamlit.sql` script executed by the SKILL.md installer AFTER PUT succeeds.
+
+<!-- REPO_SPECIFIC_END: known-issues -->
+
 ## Coding Conventions
 
 ### SQL Style
@@ -246,6 +255,18 @@ URL path patterns by resource type:
 | Intelligence Agent | `<BASE_URL>/#/agents/database/<DB>/schema/<SCHEMA>/agent/<AGENT_NAME>/details` |
 | Snowflake CoWork | `https://ai.snowflake.com/<org>/<account>/#/ai` (note: `ai.snowflake.com`, not `app.snowflake.com`) |
 
+<!-- REPO_SPECIFIC_START: snowsight-url-examples -->
+
+Examples:
+
+```
+Streamlit:  https://app.snowflake.com/myorg/myaccount/#/streamlit-apps/SF_SOLUTIONS.CLINICAL_QUALITY_SAFETY.CLINICAL_DASHBOARD
+Agent:      https://app.snowflake.com/myorg/myaccount/#/agents/database/SF_SOLUTIONS/schema/CLINICAL_QUALITY_SAFETY/agent/CLINICAL_QUALITY_SAFETY_AGENT/details
+CoWork:     https://ai.snowflake.com/myorg/myaccount/#/ai
+```
+
+<!-- REPO_SPECIFIC_END: snowsight-url-examples -->
+
 SQL for Streamlit URL:
 
 ```sql
@@ -301,6 +322,10 @@ Reference when creating new solutions to avoid schema name conflicts and to foll
 
 | Solution | Industry | Database | Schemas | Key Features |
 |----------|----------|----------|---------|--------------|
+<!-- REPO_SPECIFIC_START: existing-solutions -->
+| clinical-quality-agent | Healthcare | SF_SOLUTIONS | CLINICAL_QUALITY_SAFETY | CoWork, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model |
+| medical-device-streaming | Healthcare | SF_SOLUTIONS | MEDICAL_DEVICE_CLINICAL, MEDICAL_DEVICE_TELEMETRY | Snowpipe Streaming, PIPE Objects, ASOF Joins, VARIANT, Flattened Views |
+<!-- REPO_SPECIFIC_END: existing-solutions -->
 
 Notes:
 - All solutions use `SF_SOLUTIONS` database.

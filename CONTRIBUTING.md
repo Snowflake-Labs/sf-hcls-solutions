@@ -66,6 +66,19 @@ Optional:
 | `README.md` | Overview, usage instructions, skill invocation examples |
 | `plugins/cortex-code/` | CoCo plugin directory (skills, agents, hooks, etc.) |
 
+<!-- REPO_SPECIFIC_START: guidelines -->
+
+## SKILL.md Guidelines (HCLS-specific)
+
+- Use `$ARGUMENTS` to differentiate install vs teardown
+- The **last two steps** before teardown must always be:
+  1. **Retrieve and display the Streamlit URL** (if applicable) — marked as `[MANDATORY — DO NOT SKIP]`
+  2. **Show the final summary with Next Actions**
+- Include a `## Next Actions` section that references NEXT_ACTIONS.md
+- The step numbers will vary by solution (e.g., a simple solution may use Steps 5-6, a complex one Steps 9-10)
+
+<!-- REPO_SPECIFIC_END: guidelines -->
+
 ## NEXT_ACTIONS.md Guidelines (Script Type Only)
 
 This file is read when the user asks "what next?" after installing. Structure it as progressive phases:
