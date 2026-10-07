@@ -2,16 +2,14 @@
 
 Disclaimer: This application is not part of the Snowflake Service and is governed by the terms in LICENSE, unless expressly agreed to in writing. You use this application at your own risk, and Snowflake has no obligation to support your use of this application. [Learn more](./LEGAL.md)
 
-**HCLS: Healthcare & Life Sciences**
+**HCLS: Healthcare {{INDUSTRY_NAME}} Life Sciences**
 
-End-to-end solution accelerators for the Healthcare & Life Sciences industry vertical, built on Snowflake and Cortex Code, showcasing Cortex AI, Snowflake ML, and the modern data platform.
+End-to-end solution accelerators for the Healthcare {{INDUSTRY_NAME}} Life Sciences industry vertical, built on Snowflake and Cortex Code, showcasing Cortex AI, Snowflake ML, and the modern data platform.
 
 This repository is part of the [Snowflake Industry Solutions](https://github.com/Snowflake-Labs/sf-solutions) catalogue — a central hub for discovering, installing, and managing all industry solution accelerators across verticals.
 
 ## Requirements
 
-- Snowflake Trial account
-- Enterprise edition+
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) (Python package manager)
 
@@ -21,21 +19,60 @@ This repository is part of the [Snowflake Industry Solutions](https://github.com
 
 | # | Solution | Industry | Directory | Key Snowflake Features | Status |
 |---|----------|----------|-----------|----------------------|--------|
-| 1 | **Clinical Quality and Patient Safety Agent** | Healthcare | `solutions/clinical-quality-agent/` | Snowflake Intelligence, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model | ✅ Done |
-| 2 | **Medical Device Streaming Platform** | Healthcare | `solutions/medical-device-streaming/` | Snowpipe Streaming (High-Performance), PIPE Objects, ASOF Joins, VARIANT Data, Flattened Views | ✅ Done |
+<!-- Add solutions here -->
 
 ---
 
-## Quick Install (via Cortex Code)
+## How to Install
 
-> **TBA** — Plugin install command will be available after public release.
+There are two ways to install a solution from this repository. Option 1 is recommended.
+
+### Option 1: Use the sf-solutions plugin (recommended)
+
+Install the [`sf-solutions`](https://github.com/Snowflake-Labs/sf-solutions) plugin into CoCo, then install any solution by name.
+
+#### Snowflake CoCo Desktop (GUI)
+
+1. Open **Settings** and select **Plugins** in the left menu.
+2. Click the **+** button at the top right, then select **Add from GitHub**.
+3. In the **Add plugin from GitHub** dialog, enter the following URL and press **Enter**:
+
+   ```
+   https://github.com/Snowflake-Labs/sf-solutions/tree/main/plugins/cortex-code
+   ```
+
+4. CoCo clones the repository and registers the plugin. Confirm that the **sf-solutions** card appears in the Plugins list with its toggle turned on.
+
+#### Snowflake CoCo CLI
+
+```bash
+cortex plugin install github:Snowflake-Labs/sf-solutions/plugins/cortex-code
+cortex plugin list   # confirm "sf-solutions" is listed as [enabled, managed]
+```
+
+If a CoCo session is already running, run `/plugin reload` (or restart CoCo) to load the plugin. To get the latest version later, run `cortex plugin update sf-solutions`.
+
+Then, in CoCo:
 
 ```
-$sf-solutions                              # List all available solutions
-$sf-solutions hcls                         # Filter by HCLS industry
-$sf-solutions:clinical-quality-agent       # Install a solution
-$sf-solutions:clinical-quality-agent teardown  # Remove a solution
+$sf-solutions:list hcls                  # List HCLS solutions
+$sf-solutions:install <solution-name>       # Install a solution
+$sf-solutions:teardown <solution-name>      # Remove a solution
+$sf-solutions:next <solution-name>          # Post-install guidance
 ```
+
+The plugin shows the disclaimer and the installation plan, and waits for your confirmation before making any change.
+
+### Option 2: Install manually from the solution folder
+
+Each solution is self-contained. Clone this repository, go to the solution's folder, and follow the installation steps in that solution's `README.md`.
+
+```bash
+git clone https://github.com/Snowflake-Labs/sf-hcls-solutions.git
+cd sf-hcls-solutions/solutions/<solution-name>
+```
+
+Read the disclaimer and the Prerequisites in the solution's `README.md` before running anything.
 
 ---
 
