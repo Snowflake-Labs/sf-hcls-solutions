@@ -2,9 +2,9 @@
 
 Disclaimer: This application is not part of the Snowflake Service and is governed by the terms in LICENSE, unless expressly agreed to in writing. You use this application at your own risk, and Snowflake has no obligation to support your use of this application. [Learn more](./LEGAL.md)
 
-**HCLS: Healthcare {{INDUSTRY_NAME}} Life Sciences**
+**HCLS: Healthcare & Life Sciences**
 
-End-to-end solution accelerators for the Healthcare {{INDUSTRY_NAME}} Life Sciences industry vertical, built on Snowflake and Cortex Code, showcasing Cortex AI, Snowflake ML, and the modern data platform.
+End-to-end solution accelerators for the Healthcare & Life Sciences industry vertical, built on Snowflake and Cortex Code, showcasing Cortex AI, Snowflake ML, and the modern data platform.
 
 This repository is part of the [Snowflake Industry Solutions](https://github.com/Snowflake-Labs/sf-solutions) catalogue — a central hub for discovering, installing, and managing all industry solution accelerators across verticals.
 

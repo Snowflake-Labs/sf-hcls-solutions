@@ -1,7 +1,7 @@
 [project]
 name = "sf-hcls-solutions"
 version = "0.1.0"
-description = "Snowflake Healthcare {{INDUSTRY_NAME}} Life Sciences Solution Accelerators"
+description = "Snowflake Healthcare & Life Sciences Solution Accelerators"
 requires-python = ">=3.11"
 dependencies = []
 

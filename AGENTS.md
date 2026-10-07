@@ -8,7 +8,7 @@ Project-level instructions for AI coding assistants working on this repository.
 
 ## Project Overview
 
-This is the `sf-hcls-solutions` repository containing Snowflake HCLS (Healthcare {{INDUSTRY_NAME}} Life Sciences) industry solution accelerators. Each solution lives in `solutions/<name>/` and is either a **script type** (SQL + optional Python/Streamlit) or a **plugin type** (CoCo plugin with skills, agents, hooks).
+This is the `sf-hcls-solutions` repository containing Snowflake HCLS (Healthcare & Life Sciences) industry solution accelerators. Each solution lives in `solutions/<name>/` and is either a **script type** (SQL + optional Python/Streamlit) or a **plugin type** (CoCo plugin with skills, agents, hooks).
 
 ## Known Issues and Workarounds
 

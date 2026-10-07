@@ -1,6 +1,6 @@
 # Contributing to sf-hcls-solutions
 
-Thank you for contributing to Snowflake Healthcare {{INDUSTRY_NAME}} Life Sciences Solutions!
+Thank you for contributing to Snowflake Healthcare & Life Sciences Solutions!
 
 > **Note:** Only Snowflake employees may contribute to this repository. External contributions are not accepted.
 
