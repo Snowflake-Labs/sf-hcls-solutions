@@ -5,7 +5,7 @@ import { z } from "zod"
 
 export const dynamic = "force-dynamic"
 
-// GET — list pending/all submissions (admin only)
+// GET — list pending/all submissions (visible to all authenticated users)
 export async function GET() {
   try {
     const rows = await querySnowflake(
@@ -28,8 +28,26 @@ const ActionSchema = z.object({
   notes: z.string().max(4000).optional().default(""),
 })
 
-// POST — approve or reject a submission
+// SECURITY: approve/reject requires WORKBENCH_ADMIN role.
+async function requireAdmin(): Promise<Response | null> {
+  try {
+    const [row] = await querySnowflake("SELECT CURRENT_ROLE() AS role", { callersRights: true })
+    const callerRole = String(row?.ROLE ?? "").toUpperCase()
+    if (callerRole !== "WORKBENCH_ADMIN") {
+      return Response.json({ error: "Forbidden: requires WORKBENCH_ADMIN role" }, { status: 403 })
+    }
+    return null
+  } catch {
+    if (process.env.SWB_LOCAL_DEV_ADMIN === "true") return null
+    return Response.json({ error: "Forbidden: could not verify caller role" }, { status: 403 })
+  }
+}
+
+// POST — approve or reject a submission (admin only)
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+
   try {
     const body = ActionSchema.safeParse(await req.json())
     if (!body.success) {
