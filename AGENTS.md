@@ -68,7 +68,6 @@ SELECT PARSE_JSON(
 
 - PUT is a client-side command — it cannot be executed inside SQL worksheets in Snowsight or inside `.sql` files.
 - In Cortex Code, use `snowflake_sql_execute` with PUT, but the stage path must be relative. Use `USE SCHEMA` first, then `@STAGE_NAME/` (not `@DB.SCHEMA.STAGE/` which gives "Schema does not exist").
-- In Claude Code CLI, use `snow sql -q "PUT file://... @DB.SCHEMA.STAGE/ AUTO_COMPRESS=FALSE OVERWRITE=TRUE;"`.
 - Always use `AUTO_COMPRESS=FALSE` for `.py` and `.yml` files.
 
 ### Streamlit Deployment (CREATE STREAMLIT)
@@ -85,7 +84,7 @@ CREATE OR REPLACE STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME>
     QUERY_WAREHOUSE = SF_SOLUTIONS_WH;
 ```
 
-**Correct pattern** (proven to work, same as `ltv-prediction`):
+**Correct pattern** (proven to work):
 
 ```sql
 -- CORRECT: FROM syntax + ADD LIVE VERSION
@@ -101,9 +100,8 @@ ALTER STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME> ADD LIVE VERSION FROM LAST;
 1. Use `FROM '@STAGE'` syntax (NOT `ROOT_LOCATION`)
 2. ALWAYS run `ALTER STREAMLIT ... ADD LIVE VERSION FROM LAST;` after CREATE — without this, the app exists as metadata but is NOT visible in the Streamlit Apps dashboard
 3. Files MUST be on the stage BEFORE `CREATE STREAMLIT` — if PUT was skipped or failed, the app will show "App not found"
-4. Do NOT put `CREATE STREAMLIT` in `setup.sql` — use a separate `deploy_streamlit.sql` script executed by the SKILL.md installer AFTER PUT succeeds
-5. Always verify with `SHOW STREAMLITS IN SCHEMA ...` before displaying the URL
-6. Always verify with `LIST @STAGE` that files are uploaded before creating the Streamlit object
+4. Always verify with `SHOW STREAMLITS IN SCHEMA ...` before displaying the URL
+5. Always verify with `LIST @STAGE` that files are uploaded before creating the Streamlit object
 
 ### Snowflake SQL Reserved Words
 
@@ -131,6 +129,31 @@ ALTER STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME> ADD LIVE VERSION FROM LAST;
 - Heredoc and multiline strings in `gh pr create --body` can get stuck in zsh.
 - Workaround: use `$(cat <<'EOF' ... EOF)` syntax for the body.
 
+### Cortex Agent — CoWork Visibility
+
+- After creating an Agent with `CREATE AGENT`, you must GRANT USAGE for it to appear in CoWork (Snowflake Intelligence).
+- The Agent owner role can issue the GRANT without ACCOUNTADMIN:
+  ```sql
+  GRANT USAGE ON AGENT <db>.<schema>.<agent_name> TO ROLE PUBLIC;
+  ```
+- Without this GRANT, the Agent exists but is invisible in CoWork for other roles/users.
+- Trial accounts may auto-grant visibility; Enterprise accounts do not.
+
+### GitHub Actions — Required Status Checks with Path Filters
+
+- Workflows with `paths:` filters do NOT trigger when no matching files change.
+- If such a workflow is listed in a ruleset as a required status check, the PR gets stuck on "Waiting for status to be reported" forever.
+- **Fix:** Remove `paths:` from the workflow trigger and add an early-exit check inside the job (e.g., "No SQL files found — skipping").
+
+<!-- REPO_SPECIFIC_START: known-issues -->
+
+### HCLS-specific notes
+
+- In Claude Code CLI, use `snow sql -q "PUT file://... @DB.SCHEMA.STAGE/ AUTO_COMPRESS=FALSE OVERWRITE=TRUE;"`.
+- Streamlit: Do NOT put `CREATE STREAMLIT` in `setup.sql` — use a separate `deploy_streamlit.sql` script executed by the SKILL.md installer AFTER PUT succeeds.
+
+<!-- REPO_SPECIFIC_END: known-issues -->
+
 ## Coding Conventions
 
 ### SQL Style
@@ -151,8 +174,6 @@ ALTER STREAMLIT SF_SOLUTIONS.<SCHEMA>.<APP_NAME> ADD LIVE VERSION FROM LAST;
 - Use fully qualified names (`SF_SOLUTIONS.<SCHEMA>.<TABLE>`) for all queries.
 - Cast numeric columns to `::FLOAT` in SQL queries that feed Plotly charts.
 - Use `plotly.graph_objects`, not `plotly.express`, for charts.
-
-## Solution Structure
 
 ## Solution Structure
 
@@ -188,7 +209,20 @@ solutions/<name>/
 
 When demo data exceeds ~200 lines, extract it into a separate `data.sql` file. This prevents CoCo CLI context overflow and allows direct execution via `snow sql -f scripts/data.sql`.
 
-The installer plugin is TBA (pending public release). This repo contains only the solution source code and metadata.
+This repo contains only the solution source code and metadata. Solutions are installed by the `sf-solutions` plugin from [Snowflake-Labs/sf-solutions](https://github.com/Snowflake-Labs/sf-solutions):
+
+```bash
+cortex plugin install github:Snowflake-Labs/sf-solutions/plugins/cortex-code
+```
+
+### Skill Invocation
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `$sf-solutions:list [industry]` | List solutions | `$sf-solutions:list hcls` |
+| `$sf-solutions:install <name>` | Install a solution | `$sf-solutions:install <example-solution>` |
+| `$sf-solutions:teardown <name>` | Remove a solution | `$sf-solutions:teardown <example-solution>` |
+| `$sf-solutions:next <name>` | Post-install guidance | `$sf-solutions:next <example-solution>` |
 
 ### Snowsight URL Patterns
 
@@ -221,6 +255,8 @@ URL path patterns by resource type:
 | Intelligence Agent | `<BASE_URL>/#/agents/database/<DB>/schema/<SCHEMA>/agent/<AGENT_NAME>/details` |
 | Snowflake CoWork | `https://ai.snowflake.com/<org>/<account>/#/ai` (note: `ai.snowflake.com`, not `app.snowflake.com`) |
 
+<!-- REPO_SPECIFIC_START: snowsight-url-examples -->
+
 Examples:
 
 ```
@@ -228,6 +264,8 @@ Streamlit:  https://app.snowflake.com/myorg/myaccount/#/streamlit-apps/SF_SOLUTI
 Agent:      https://app.snowflake.com/myorg/myaccount/#/agents/database/SF_SOLUTIONS/schema/CLINICAL_QUALITY_SAFETY/agent/CLINICAL_QUALITY_SAFETY_AGENT/details
 CoWork:     https://ai.snowflake.com/myorg/myaccount/#/ai
 ```
+
+<!-- REPO_SPECIFIC_END: snowsight-url-examples -->
 
 SQL for Streamlit URL:
 
@@ -270,7 +308,7 @@ Commit messages must use one of: `feat`, `fix`, `chore`, `docs`, `refactor`, `ci
 
 Examples:
 ```
-feat: add clinical-quality-agent solution
+feat: add new-solution-name solution
 fix: correct SEARCH_PREVIEW argument format
 docs: update AGENTS.md with PR template
 chore: format files with ruff
@@ -278,12 +316,16 @@ chore: format files with ruff
 
 ## Existing Solutions
 
+<!-- Update this table when adding new solutions -->
+
 Reference when creating new solutions to avoid schema name conflicts and to follow established patterns.
 
 | Solution | Industry | Database | Schemas | Key Features |
 |----------|----------|----------|---------|--------------|
+<!-- REPO_SPECIFIC_START: existing-solutions -->
 | clinical-quality-agent | Healthcare | SF_SOLUTIONS | CLINICAL_QUALITY_SAFETY | CoWork, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model |
 | medical-device-streaming | Healthcare | SF_SOLUTIONS | MEDICAL_DEVICE_CLINICAL, MEDICAL_DEVICE_TELEMETRY | Snowpipe Streaming, PIPE Objects, ASOF Joins, VARIANT, Flattened Views |
+<!-- REPO_SPECIFIC_END: existing-solutions -->
 
 Notes:
 - All solutions use `SF_SOLUTIONS` database.

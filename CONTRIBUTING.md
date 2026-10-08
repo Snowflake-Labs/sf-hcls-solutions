@@ -66,6 +66,8 @@ Optional:
 | `README.md` | Overview, usage instructions, skill invocation examples |
 | `plugins/cortex-code/` | CoCo plugin directory (skills, agents, hooks, etc.) |
 
+<!-- REPO_SPECIFIC_START: guidelines -->
+
 ## SKILL.md Guidelines (HCLS-specific)
 
 - Use `$ARGUMENTS` to differentiate install vs teardown
@@ -74,6 +76,8 @@ Optional:
   2. **Show the final summary with Next Actions**
 - Include a `## Next Actions` section that references NEXT_ACTIONS.md
 - The step numbers will vary by solution (e.g., a simple solution may use Steps 5-6, a complex one Steps 9-10)
+
+<!-- REPO_SPECIFIC_END: guidelines -->
 
 ## NEXT_ACTIONS.md Guidelines (Script Type Only)
 
@@ -84,7 +88,7 @@ This file is read when the user asks "what next?" after installing. Structure it
 3. **Tune the Model** — adjust parameters, add features
 4. **Production Deployment** — scheduling, monitoring, RBAC
 
-## Snowsight URL Format
+## Snowsight URL Format (Script Type)
 
 Always use this format for Snowsight URLs:
 
@@ -110,7 +114,7 @@ SELECT 'https://app.snowflake.com/' || LOWER(CURRENT_ORGANIZATION_NAME()) || '/'
 
 Before submitting a PR:
 
-1. Run `setup.sql` end-to-end on a clean account
+1. Run `setup.sql` end-to-end on a clean account (script type)
 2. Verify all objects are created (check INFORMATION_SCHEMA)
 3. Open the Streamlit dashboard URL and confirm it loads without errors
 4. Run `teardown.sql` and verify everything is removed
