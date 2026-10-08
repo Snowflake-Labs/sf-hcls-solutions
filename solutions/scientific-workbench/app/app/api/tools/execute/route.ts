@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
     const toolType = tools[0].TOOL_TYPE
     const paramSchema = JSON.parse(tools[0].PARAMETERS || "{}")
 
-    // Validate funcRef as a safe qualified identifier
+    // SECURITY: funcRef comes from CATALOG.TOOLS (SYSADMIN-only, written by REGISTER_TOOL).
+    // It is validated through quoteQualifiedName() which rejects non-identifier characters
+    // and double-quotes each segment. SQL identifiers cannot use bind variables, so
+    // quoted interpolation is the standard defense here. All user-supplied params use binds.
     let quotedFuncRef: string
     try {
       quotedFuncRef = quoteQualifiedName(funcRef)
