@@ -320,9 +320,9 @@ chore: format files with ruff
 
 Reference when creating new solutions to avoid schema name conflicts and to follow established patterns.
 
+<!-- REPO_SPECIFIC_START: existing-solutions -->
 | Solution | Industry | Database | Schemas | Key Features |
 |----------|----------|----------|---------|--------------|
-<!-- REPO_SPECIFIC_START: existing-solutions -->
 | clinical-quality-agent | Healthcare | SF_SOLUTIONS | CLINICAL_QUALITY_SAFETY | CoWork, Cortex Agent, Cortex Analyst, Cortex Search (PubMed), Semantic Model |
 | medical-device-streaming | Healthcare | SF_SOLUTIONS | MEDICAL_DEVICE_CLINICAL, MEDICAL_DEVICE_TELEMETRY | Snowpipe Streaming, PIPE Objects, ASOF Joins, VARIANT, Flattened Views |
 <!-- REPO_SPECIFIC_END: existing-solutions -->
