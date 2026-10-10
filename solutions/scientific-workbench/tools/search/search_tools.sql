@@ -27,8 +27,9 @@ AS
 $$
 import json
 
-SERVICE = 'SCIENTIFIC_WORKBENCH.CATALOG.CLINICAL_TRIALS_CKE_SEARCH'
-COLUMNS = ['NCT_ID', 'TITLE', 'PHASE', 'STATUS', 'CONDITIONS', 'INTERVENTIONS', 'SPONSOR']
+# ── CKE service discovery ────────────────────────────────────────────────────
+DEFAULT_SERVICE = 'CLINICAL_TRIALS_RESEARCH_DATABASE.CT.CLINICAL_TRIALS_SEARCH_SERVICE'
+COLUMNS = ['NCT_ID', 'BRIEF_TITLE', 'OVERALL_STATUS', 'PHASES', 'CONDITIONS', 'LEAD_SPONSOR']
 
 def _search(session, service, request):
     rows = session.sql(
@@ -37,10 +38,24 @@ def _search(session, service, request):
     ).collect()
     return json.loads(rows[0][0]) if rows and rows[0][0] else {}
 
+def _resolve_service(session):
+    """Read the CKE service name from config, or fall back to the well-known default."""
+    try:
+        rows = session.sql(
+            "SELECT SERVICE_FQN FROM SCIENTIFIC_WORKBENCH.CATALOG.CKE_CONFIG "
+            "WHERE CKE_NAME = 'CLINICAL_TRIALS' AND ACTIVE = TRUE LIMIT 1"
+        ).collect()
+        if rows and rows[0][0]:
+            return rows[0][0]
+    except Exception:
+        pass
+    return DEFAULT_SERVICE
+
 def run(session, query: str, max_results: int) -> str:
     if not query or not str(query).strip():
         return json.dumps({'status': 'error', 'message': 'query is required'})
 
+    service = _resolve_service(session)
     limit = max(1, min(int(max_results or 5), 100))
     attempts = [
         json.dumps({'query': str(query), 'columns': COLUMNS, 'limit': limit}),
@@ -50,16 +65,16 @@ def run(session, query: str, max_results: int) -> str:
     last = ''
     for request in attempts:
         try:
-            payload = _search(session, SERVICE, request)
+            payload = _search(session, service, request)
         except Exception as e:
             last = str(e)
             low = last.lower()
             if 'does not exist' in low or 'not authorized' in low or 'unknown' in low:
                 return json.dumps({
                     'status': 'unavailable',
-                    'service': SERVICE,
+                    'service': service,
                     'message': (
-                        f'Cortex Search service {SERVICE} is not available in this '
+                        f'Cortex Search service {service} is not available in this '
                         'account. Clinical trials search requires the '
                         'ClinicalTrials.gov Cortex Knowledge Extension from Snowflake '
                         'Marketplace. Subscribe to it, then create the search service '

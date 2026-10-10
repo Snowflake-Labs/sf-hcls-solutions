@@ -494,6 +494,21 @@ run_sql "$SCRIPT_DIR/scripts/05-tool-registry.sql" "SYSADMIN" "WORKBENCH_XS" "To
 log "Step 6/11: Cortex services (Search, Agent, CKE)"
 run_sql "$SCRIPT_DIR/scripts/06-cortex-services.sql" "SYSADMIN" "WORKBENCH_XS" "Cortex Search, Agent, CKE subscriptions"
 
+# Step 6b: CKE database grants (requires ACCOUNTADMIN)
+# CKEs from Marketplace install as separate databases. SYSADMIN (procedure owner)
+# and workbench roles need IMPORTED PRIVILEGES to query them.
+CKE_DATABASES=("PUBMED_BIOMEDICAL_RESEARCH_CORPUS" "CLINICAL_TRIALS_RESEARCH_DATABASE")
+for cke_db in "${CKE_DATABASES[@]}"; do
+  # Check if the CKE database exists before granting
+  if snow sql -c "$CONNECTION" --role ACCOUNTADMIN -q "SHOW DATABASES LIKE '${cke_db}'" 2>/dev/null | grep -q "$cke_db"; then
+    run_sql_inline "GRANT IMPORTED PRIVILEGES ON DATABASE ${cke_db} TO ROLE SYSADMIN" "ACCOUNTADMIN" "WORKBENCH_XS" "CKE grant: ${cke_db} -> SYSADMIN"
+    run_sql_inline "GRANT IMPORTED PRIVILEGES ON DATABASE ${cke_db} TO ROLE WORKBENCH_ADMIN" "ACCOUNTADMIN" "WORKBENCH_XS" "CKE grant: ${cke_db} -> WORKBENCH_ADMIN"
+    log "  CKE database ${cke_db}: grants applied"
+  else
+    warn "  CKE database ${cke_db}: not found — subscribe from Marketplace"
+  fi
+done
+
 # Step 7: Governance
 log "Step 7/11: Governance framework"
 run_sql "$SCRIPT_DIR/scripts/07-governance.sql" "SYSADMIN" "WORKBENCH_XS" "Provenance log, canary assertions"
