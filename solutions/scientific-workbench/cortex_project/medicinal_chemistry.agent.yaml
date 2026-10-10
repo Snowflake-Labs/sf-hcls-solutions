@@ -25,7 +25,7 @@ tools:
   - tool_spec:
       type: generic
       name: run_diffdock
-      description: Predict ligand poses against a PDB structure with hosted NVIDIA DiffDock.
+      description: Predict ligand poses against a PDB structure with hosted NVIDIA DiffDock. target_pdb accepts a 4-char PDB ID (downloaded automatically), an @stage path, or raw PDB text.
       input_schema: {type: object, properties: {smiles: {type: string}, target_pdb: {type: string}, n_poses: {type: integer, minimum: 1, maximum: 20}, output_table: {type: string}}, required: [smiles, target_pdb, n_poses, output_table]}
   - tool_spec:
       type: generic
