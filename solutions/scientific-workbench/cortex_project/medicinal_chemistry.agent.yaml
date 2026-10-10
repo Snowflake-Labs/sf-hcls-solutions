@@ -8,7 +8,7 @@ instructions:
   orchestration: |
     Before calling a procedure, load the matching configured skill and follow it. Load generate-and-filter-molecules before run_genmol, optimize-lead-molecule before run_molmim, and dock-and-rank-candidates before run_diffdock or ligand-affinity run_boltz2 calls. Do not call the procedure before loading the skill. Never use bash or shell commands to query results. Do not retry a failed procedure unless the error is explicitly transient and one retry is safe.
     Use GenMol for generation, MolMIM for single-property optimization, DiffDock for poses, and Boltz-2 for structure or affinity when a protein sequence is supplied. Never infer potency, selectivity, safety, novelty, or synthesizability from generation or docking scores.
-    Every output_table must be a unique unquoted identifier under SCIENTIFIC_WORKBENCH.RESULTS using only uppercase letters, digits, and underscores. Never write elsewhere. Ask for missing scientific inputs.
+    Every output_table must be a unique unquoted identifier under SCIENTIFIC_WORKBENCH.RESULTS using only uppercase letters, digits, and underscores. Never write elsewhere. Ask for missing scientific inputs. After a tool writes results to an output_table, call read_results to inspect and summarize the output for the user.
   response: |
     Report exact counts and scores, name each metric, give result-table references, and separate predictions from interpretation.
 tools:
@@ -32,11 +32,17 @@ tools:
       name: run_boltz2
       description: Predict protein structure and optional protein-ligand affinity with hosted NVIDIA Boltz-2.
       input_schema: {type: object, properties: {protein_sequence: {type: string}, ligand_smiles: {type: string}, task: {type: string, enum: [structure, affinity, complex]}, output_table: {type: string}}, required: [protein_sequence, ligand_smiles, task, output_table]}
+  - tool_spec:
+      type: generic
+      name: read_results
+      description: Read rows from a results table to inspect tool output. Call after any NIM procedure writes to an output_table.
+      input_schema: {type: object, properties: {table_name: {type: string}, max_rows: {type: integer, minimum: 1, maximum: 200, default: 20}}, required: [table_name]}
 tool_resources:
   run_genmol: {type: procedure, identifier: SCIENTIFIC_WORKBENCH.CATALOG.RUN_GENMOL, execution_environment: {type: warehouse, warehouse: WORKBENCH_S, query_timeout: 600}}
   run_molmim: {type: procedure, identifier: SCIENTIFIC_WORKBENCH.CATALOG.RUN_MOLMIM, execution_environment: {type: warehouse, warehouse: WORKBENCH_S, query_timeout: 600}}
   run_diffdock: {type: procedure, identifier: SCIENTIFIC_WORKBENCH.CATALOG.RUN_DIFFDOCK, execution_environment: {type: warehouse, warehouse: WORKBENCH_S, query_timeout: 600}}
   run_boltz2: {type: procedure, identifier: SCIENTIFIC_WORKBENCH.CATALOG.RUN_BOLTZ2, execution_environment: {type: warehouse, warehouse: WORKBENCH_S, query_timeout: 600}}
+  read_results: {type: procedure, identifier: SCIENTIFIC_WORKBENCH.CATALOG.READ_RESULTS, execution_environment: {type: warehouse, warehouse: WORKBENCH_XS, query_timeout: 30}}
 skills:
   - name: generate-and-filter-molecules
     source: {type: STAGE, path: "@SCIENTIFIC_WORKBENCH.CATALOG.AGENT_SKILLS/skills/generate-and-filter-molecules"}
