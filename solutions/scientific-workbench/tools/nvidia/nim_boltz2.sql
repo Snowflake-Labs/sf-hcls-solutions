@@ -123,7 +123,9 @@ def run(session, protein_sequence: str, ligand_smiles: str, task: str, output_ta
         'STRUCTURE_MMCIF': str(structure_mmcif)[:50000] if structure_mmcif else None
     }]
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
 
     score_str = f'pLDDT={complex_plddt:.3f}' if complex_plddt is not None else 'no confidence'

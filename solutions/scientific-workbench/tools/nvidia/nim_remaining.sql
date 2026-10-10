@@ -106,7 +106,9 @@ def run(session, seed_smiles: str, optimize_for: str, n_steps: int, n_samples: i
     if not rows:
         return f'WARNING: No molecules returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return f'SUCCESS: Generated {len(rows)} optimized molecules for {prop}. Results in {output_table}'
 $$;
@@ -226,7 +228,9 @@ def run(session, protein_sequence: str, output_table: str) -> str:
     if not rows:
         return f'WARNING: No structures returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     top = rows[0]
     score = f", top pLDDT={top['PLDDT']:.3f}" if top['PLDDT'] is not None else ''
@@ -356,7 +360,9 @@ def run(session, sequences, output_table: str) -> str:
     if not rows:
         return f'WARNING: No structures returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     top = rows[0]
     score = f", complex pLDDT={top['PLDDT']:.2f}" if top['PLDDT'] is not None else ''
@@ -453,7 +459,9 @@ def run(session, protein_sequence: str, output_table: str) -> str:
     if not rows:
         return f'WARNING: No alignments returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     total = sum(r['N_SEQUENCES'] for r in rows)
     return f'SUCCESS: Built MSA with {total} sequences across {len(rows)} database/format pair(s). Results in {output_table}'
@@ -538,7 +546,9 @@ def run(session, prompt_sequence: str, n_tokens: int, output_table: str) -> str:
     if not generated:
         return f'WARNING: No sequence returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return f'SUCCESS: Generated {len(str(generated))} nucleotides. Results in {output_table}'
 $$;

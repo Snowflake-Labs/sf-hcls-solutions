@@ -109,7 +109,9 @@ def run(session, backbone_pdb_stage_path: str, n_samples: int, temperature: floa
     if not rows:
         return f'WARNING: No sequences returned. Raw keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return f'SUCCESS: Designed {len(rows)} sequences. Results in {output_table}'
 $$;

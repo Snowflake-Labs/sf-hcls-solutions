@@ -226,7 +226,9 @@ def run(session, seed_smiles: str, target_pdb: str, n_molecules, output_table: s
                      'GEN_SCORE': float(gen_score) if gen_score is not None else None,
                      'DOCK_CONFIDENCE': dock_conf, 'AFFINITY_PIC50': pic50})
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     scored = sum(1 for r in rows if r['DOCK_CONFIDENCE'] is not None)
     affd = sum(1 for r in rows if r['AFFINITY_PIC50'] is not None)
@@ -359,7 +361,9 @@ def run(session, protein_sequence: str, ligand_smiles: str, output_table: str) -
     if not rows:
         return f'WARNING: pipeline produced no structures. OpenFold3 keys: {list(of3.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return (f'SUCCESS: MSA ({n_hits} hits) then {len(rows)} structure(s). '
             f'Results in {output_table}')

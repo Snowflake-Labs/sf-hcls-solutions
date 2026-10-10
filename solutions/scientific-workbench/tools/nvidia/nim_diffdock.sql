@@ -102,7 +102,9 @@ def run(session, smiles: str, target_pdb: str, n_poses: int, output_table: str) 
     if not rows:
         return f'WARNING: No poses returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     best = max([r['CONFIDENCE'] for r in rows if r['CONFIDENCE'] is not None], default=None)
     best_str = f', best confidence {best:.3f}' if best is not None else ''

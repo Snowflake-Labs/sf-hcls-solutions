@@ -72,7 +72,7 @@ function getParamsForTemplate(templateId: string): ParamField[] {
 function RunWorkflowDialog({ template, onClose }: { template: Template; onClose: () => void }) {
   const router = useRouter()
   const params = getParamsForTemplate(template.TEMPLATE_ID)
-  const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15)
+  const ts = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)
   const defaultOutput = `SCIENTIFIC_WORKBENCH.RESULTS.WF_${template.TEMPLATE_ID}_${ts}`
 
   const [values, setValues] = useState<Record<string, string>>(() => {
@@ -97,7 +97,15 @@ function RunWorkflowDialog({ template, onClose }: { template: Template; onClose:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ template_name: template.NAME, params: values }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      let data: any
+      try {
+        data = JSON.parse(text)
+      } catch {
+        setError(text || `Request failed (${res.status})`)
+        setStatus("error")
+        return
+      }
       if (!res.ok || data.error) {
         setError(data.error || `Request failed (${res.status})`)
         setStatus("error")

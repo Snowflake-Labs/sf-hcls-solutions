@@ -154,7 +154,9 @@ def run(session, target_pdb: str, hotspot_residues: str, binder_length: int,
     if not rows:
         return 'ERROR: No backbones generated. ' + ' | '.join(errors[:3])
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     suffix = f' ({len(errors)} failed)' if errors else ''
     if dropped:

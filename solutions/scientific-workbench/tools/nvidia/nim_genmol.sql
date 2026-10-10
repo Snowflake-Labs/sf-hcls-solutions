@@ -74,8 +74,10 @@ def run(session, seed_smiles: str, n_samples: int, temperature: float, output_ta
         rows.append({'SMILES': smiles, 'CONFIDENCE': float(score),
                      'SEED_SMILES': seed_smiles, 'TEMPERATURE': temperature})
 
-    result_df = pd.DataFrame(rows)
-    result_sp = session.create_dataframe(result_df)
+    if not rows:
+        return f'WARNING: API returned molecules but none had parseable SMILES.'
+
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return f'SUCCESS: Generated {len(rows)} molecules from seed. Results in {output_table}'
 $$;
