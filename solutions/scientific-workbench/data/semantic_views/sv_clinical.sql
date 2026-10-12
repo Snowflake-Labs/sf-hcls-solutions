@@ -69,7 +69,7 @@ CREATE OR REPLACE SEMANTIC VIEW SCIENTIFIC_WORKBENCH.CATALOG.SV_CLINICAL
   AI_VERIFIED_QUERIES (
     RESPONSE_DISTRIBUTION AS (
       QUESTION 'How many patients responded to treatment?'
-      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = deven.atnoor)'
+      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = workbench_admin)'
       SQL 'SELECT response_group, COUNT(patient_id) AS patient_count,
                   ROUND(COUNT(patient_id) * 100.0 / SUM(COUNT(patient_id)) OVER(), 1) AS pct
            FROM WORKBENCH_PROJECTS.DEMO_NSCLC.PATIENTS
@@ -78,7 +78,7 @@ CREATE OR REPLACE SEMANTIC VIEW SCIENTIFIC_WORKBENCH.CATALOG.SV_CLINICAL
     ),
     PHASE3_TRIALS AS (
       QUESTION 'How many Phase 3 trials are currently recruiting?'
-      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = deven.atnoor)'
+      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = workbench_admin)'
       SQL 'SELECT COUNT(DISTINCT nct_id) AS trial_count
            FROM WORKBENCH_REFERENCE.CLINICAL.STUDIES
            WHERE phase ILIKE ''%phase 3%''

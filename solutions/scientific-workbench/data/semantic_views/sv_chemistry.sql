@@ -75,7 +75,7 @@ CREATE OR REPLACE SEMANTIC VIEW SCIENTIFIC_WORKBENCH.CATALOG.SV_CHEMISTRY
   AI_VERIFIED_QUERIES (
     POTENT_COMPOUNDS AS (
       QUESTION 'What are the most potent compounds against human targets by IC50?'
-      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = deven.atnoor)'
+      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = workbench_admin)'
       SQL 'SELECT m.pref_name AS compound, t.pref_name AS target, MAX(a.pchembl_value) AS best_pchembl
            FROM WORKBENCH_REFERENCE.CHEMBL.MOLECULE_DICTIONARY m
            JOIN WORKBENCH_REFERENCE.CHEMBL.ACTIVITIES a ON m.chembl_id = a.chembl_id

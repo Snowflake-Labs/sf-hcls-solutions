@@ -66,14 +66,14 @@ CREATE OR REPLACE SEMANTIC VIEW SCIENTIFIC_WORKBENCH.CATALOG.SV_GENOMICS
   AI_VERIFIED_QUERIES (
     KRAS_G12C_PATIENTS AS (
       QUESTION 'How many patients have KRAS G12C mutations?'
-      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = deven.atnoor)'
+      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = workbench_admin)'
       SQL 'SELECT COUNT(*) AS kras_g12c_patients
            FROM WORKBENCH_PROJECTS.DEMO_NSCLC.PATIENTS
            WHERE kras_mutation = ''G12C'''
     ),
     PFS_BY_RESPONSE AS (
       QUESTION 'What is the median progression-free survival by response group?'
-      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = deven.atnoor)'
+      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = workbench_admin)'
       SQL 'SELECT response_group, COUNT(*) AS n_patients, MEDIAN(pfs_months) AS median_pfs_months
            FROM WORKBENCH_PROJECTS.DEMO_NSCLC.PATIENTS
            GROUP BY response_group

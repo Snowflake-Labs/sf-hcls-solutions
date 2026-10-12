@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -43,7 +43,23 @@ interface AppSidebarProps {
 
 export function AppSidebar({ onToggleAgent, agentOpen }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const [userInfo, setUserInfo] = useState<{ name: string; role: string; initials: string }>({ name: "", role: "", initials: "" })
   const path = usePathname()
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/roles")
+        const data = await res.json()
+        const username = String(data.username ?? "").replace(/_/g, " ")
+        const role = String(data.role ?? "")
+        const parts = username.split(" ")
+        const initials = parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : username.slice(0, 2).toUpperCase()
+        setUserInfo({ name: username, role, initials })
+      } catch { /* keep empty */ }
+    }
+    loadUser()
+  }, [])
   const width = collapsed ? "var(--sidebar-width-collapsed)" : "var(--sidebar-width)"
 
   return (
@@ -152,15 +168,15 @@ export function AppSidebar({ onToggleAgent, agentOpen }: AppSidebarProps) {
             }}
             aria-hidden="true"
           >
-            DA
+            {userInfo.initials || ".."}
           </div>
           {!collapsed && (
             <div style={{ overflow: "hidden" }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: "var(--sf-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                Deven Atnoor
+                {userInfo.name || "Loading..."}
               </div>
               <div style={{ fontSize: 11, color: "var(--sf-text-subtle)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                WORKBENCH_SCIENTIST
+                {userInfo.role || ""}
               </div>
             </div>
           )}

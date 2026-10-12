@@ -40,7 +40,7 @@ CREATE OR REPLACE SEMANTIC VIEW SCIENTIFIC_WORKBENCH.CATALOG.SV_COMPOUNDS
   AI_VERIFIED_QUERIES (
     MOST_POTENT_BY_TARGET AS (
       QUESTION 'What are the most potent compounds for each target?'
-      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = deven.atnoor)'
+      VERIFIED_AT 1724803200 VERIFIED_BY '(STEWARD = workbench_admin)'
       SQL 'SELECT a.target, c.compound_id, c.project, MIN(a.value_nm) AS best_ic50_nm
            FROM WORKBENCH_PROJECTS.DEMO_COMPOUNDS.COMPOUNDS c
            JOIN WORKBENCH_PROJECTS.DEMO_COMPOUNDS.ASSAYS a ON c.compound_id = a.compound_id
