@@ -126,7 +126,20 @@ COMMENT='TOOL:{\"display_name\":\"Drug Discovery Pipeline\",\"description\":\"Th
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # REBUILT 2026-09-01. Endpoints come from CATALOG.NIM_ENDPOINTS rather than being
 # hardcoded here a second time, so this pipeline tracks the individual tools.
@@ -166,6 +179,7 @@ def _first(v):
     return v
 
 def run(session, seed_smiles: str, target_pdb: str, n_molecules, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     key = _snowflake.get_generic_secret_string('nvidia_key')
     seed = (seed_smiles or '').strip()
     if not seed:
@@ -226,7 +240,9 @@ def run(session, seed_smiles: str, target_pdb: str, n_molecules, output_table: s
                      'GEN_SCORE': float(gen_score) if gen_score is not None else None,
                      'DOCK_CONFIDENCE': dock_conf, 'AFFINITY_PIC50': pic50})
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     scored = sum(1 for r in rows if r['DOCK_CONFIDENCE'] is not None)
     affd = sum(1 for r in rows if r['AFFINITY_PIC50'] is not None)
@@ -265,7 +281,20 @@ COMMENT='TOOL:{\"display_name\":\"MSA-Structure Pipeline\",\"description\":\"Two
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # REBUILT 2026-09-01. Two changes of substance versus the original:
 #  1. Endpoints are read from CATALOG.NIM_ENDPOINTS (hosted rows) instead of being
@@ -313,6 +342,7 @@ def _num(d, *names):
     return None
 
 def run(session, protein_sequence: str, ligand_smiles: str, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     key = _snowflake.get_generic_secret_string('nvidia_key')
     seq = (protein_sequence or '').strip().upper()
     if not seq:
@@ -359,7 +389,9 @@ def run(session, protein_sequence: str, ligand_smiles: str, output_table: str) -
     if not rows:
         return f'WARNING: pipeline produced no structures. OpenFold3 keys: {list(of3.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return (f'SUCCESS: MSA ({n_hits} hits) then {len(rows)} structure(s). '
             f'Results in {output_table}')

@@ -26,7 +26,20 @@ COMMENT='TOOL:{\"display_name\":\"MolMIM — Molecule Optimization\",\"descripti
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # VERIFIED 2026-09-01 against the live hosted API.
 #   endpoint : /v1/biology/nvidia/molmim/generate
@@ -52,6 +65,7 @@ def _get_endpoint(session):
     return HOSTED_ENDPOINT
 
 def run(session, seed_smiles: str, optimize_for: str, n_steps: int, n_samples: int, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     api_key = _snowflake.get_generic_secret_string('nvidia_key')
     endpoint = _get_endpoint(session)
 
@@ -106,7 +120,9 @@ def run(session, seed_smiles: str, optimize_for: str, n_steps: int, n_samples: i
     if not rows:
         return f'WARNING: No molecules returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return f'SUCCESS: Generated {len(rows)} optimized molecules for {prop}. Results in {output_table}'
 $$;
@@ -134,7 +150,20 @@ COMMENT='TOOL:{\"display_name\":\"OpenFold2 — Monomer Structure\",\"descriptio
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # VERIFIED 2026-09-01 against the live hosted API.
 #   endpoint : /v1/biology/openfold/openfold2/predict-structure-from-msa-and-template
@@ -170,6 +199,7 @@ def _num(d, *names):
     return None
 
 def run(session, protein_sequence: str, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     api_key = _snowflake.get_generic_secret_string('nvidia_key')
     endpoint = _get_endpoint(session)
 
@@ -226,7 +256,9 @@ def run(session, protein_sequence: str, output_table: str) -> str:
     if not rows:
         return f'WARNING: No structures returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     top = rows[0]
     score = f", top pLDDT={top['PLDDT']:.3f}" if top['PLDDT'] is not None else ''
@@ -256,7 +288,20 @@ COMMENT='TOOL:{\"display_name\":\"OpenFold3 — Complex Structure\",\"descriptio
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # VERIFIED 2026-09-01 against the live hosted API.
 #   endpoint : /v1/biology/openfold/openfold3/predict   (publisher 'openfold')
@@ -296,6 +341,7 @@ def _num(d, *names):
     return None
 
 def run(session, sequences, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     api_key = _snowflake.get_generic_secret_string('nvidia_key')
     endpoint = _get_endpoint(session)
 
@@ -356,7 +402,9 @@ def run(session, sequences, output_table: str) -> str:
     if not rows:
         return f'WARNING: No structures returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     top = rows[0]
     score = f", complex pLDDT={top['PLDDT']:.2f}" if top['PLDDT'] is not None else ''
@@ -386,7 +434,20 @@ COMMENT='TOOL:{\"display_name\":\"MSA-Search — Sequence Alignment\",\"descript
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # VERIFIED 2026-09-01 against the live hosted API.
 #   endpoint : /v1/biology/colabfold/msa-search/predict  (publisher is colabfold)
@@ -413,6 +474,7 @@ def _get_endpoint(session):
     return HOSTED_ENDPOINT
 
 def run(session, protein_sequence: str, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     api_key = _snowflake.get_generic_secret_string('nvidia_key')
     endpoint = _get_endpoint(session)
 
@@ -453,7 +515,9 @@ def run(session, protein_sequence: str, output_table: str) -> str:
     if not rows:
         return f'WARNING: No alignments returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     total = sum(r['N_SEQUENCES'] for r in rows)
     return f'SUCCESS: Built MSA with {total} sequences across {len(rows)} database/format pair(s). Results in {output_table}'
@@ -482,7 +546,20 @@ COMMENT='TOOL:{\"display_name\":\"Evo2 — DNA/RNA Generation\",\"description\":
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 # VERIFIED 2026-09-01 against the live hosted API.
 #   endpoint : /v1/biology/arc/evo2-40b/generate
@@ -505,6 +582,7 @@ def _get_endpoint(session):
     return HOSTED_ENDPOINT
 
 def run(session, prompt_sequence: str, n_tokens: int, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     api_key = _snowflake.get_generic_secret_string('nvidia_key')
     endpoint = _get_endpoint(session)
 
@@ -538,7 +616,9 @@ def run(session, prompt_sequence: str, n_tokens: int, output_table: str) -> str:
     if not generated:
         return f'WARNING: No sequence returned. Response keys: {list(data.keys())}'
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
     return f'SUCCESS: Generated {len(str(generated))} nucleotides. Results in {output_table}'
 $$;

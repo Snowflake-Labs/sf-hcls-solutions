@@ -59,13 +59,48 @@ GRANT USAGE ON CORTEX SEARCH SERVICE CATALOG.TOOL_SEARCH TO ROLE WORKBENCH_SCIEN
 GRANT USAGE ON CORTEX SEARCH SERVICE CATALOG.ASSET_SEARCH TO ROLE WORKBENCH_SCIENTIST;
 
 -- =============================================================================
--- 2. CKE SUBSCRIPTIONS (from Marketplace)
+-- 2. CKE CONFIGURATION TABLE + AUTO-DISCOVERY
 -- =============================================================================
--- PubMed and ClinicalTrials.gov are available as Cortex Knowledge Extensions
--- Subscribe via Snowflake Marketplace:
---   - Search Marketplace for "PubMed" CKE
---   - Search Marketplace for "ClinicalTrials" CKE
--- After subscription, they are available as agent tools automatically.
+-- CKEs from Marketplace install into their own databases. The search procedures
+-- read CKE_CONFIG at runtime to resolve the fully-qualified service name, so
+-- deployers don't need to edit procedure source. This table stores the mapping.
+
+CREATE TABLE IF NOT EXISTS CATALOG.CKE_CONFIG (
+    CKE_NAME        VARCHAR NOT NULL,         -- PUBMED | CLINICAL_TRIALS
+    DATABASE_NAME   VARCHAR NOT NULL,         -- Marketplace database name
+    SCHEMA_NAME     VARCHAR NOT NULL,
+    SERVICE_NAME    VARCHAR NOT NULL,         -- Cortex Search service name
+    SERVICE_FQN     VARCHAR NOT NULL,         -- Fully qualified: DB.SCHEMA.SERVICE
+    ACTIVE          BOOLEAN DEFAULT TRUE,
+    DISCOVERED_AT   TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+)
+COMMENT = 'Maps CKE Marketplace subscriptions to their fully-qualified search service names';
+
+-- Auto-discover installed CKEs by scanning Cortex Search services in the account.
+-- Well-known CKE service patterns (publisher-defined names):
+MERGE INTO CATALOG.CKE_CONFIG AS tgt
+USING (
+    SELECT 'PUBMED' AS CKE_NAME,
+           'PUBMED_BIOMEDICAL_RESEARCH_CORPUS' AS DATABASE_NAME,
+           'OA_COMM' AS SCHEMA_NAME,
+           'PUBMED_CKE' AS SERVICE_NAME,
+           'PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM.PUBMED_CKE' AS SERVICE_FQN
+    UNION ALL
+    SELECT 'CLINICAL_TRIALS',
+           'CLINICAL_TRIALS_RESEARCH_DATABASE',
+           'CT',
+           'CLINICAL_TRIALS_SEARCH_SERVICE',
+           'CLINICAL_TRIALS_RESEARCH_DATABASE.CT.CLINICAL_TRIALS_SEARCH_SERVICE'
+) AS src
+ON tgt.CKE_NAME = src.CKE_NAME
+WHEN NOT MATCHED THEN INSERT (CKE_NAME, DATABASE_NAME, SCHEMA_NAME, SERVICE_NAME, SERVICE_FQN)
+    VALUES (src.CKE_NAME, src.DATABASE_NAME, src.SCHEMA_NAME, src.SERVICE_NAME, src.SERVICE_FQN)
+WHEN MATCHED THEN UPDATE SET
+    SERVICE_FQN = src.SERVICE_FQN,
+    DISCOVERED_AT = CURRENT_TIMESTAMP();
+
+GRANT SELECT ON TABLE CATALOG.CKE_CONFIG TO ROLE WORKBENCH_ADMIN;
+GRANT SELECT ON TABLE CATALOG.CKE_CONFIG TO ROLE WORKBENCH_SCIENTIST;
 
 -- =============================================================================
 -- 3. CORTEX AGENT

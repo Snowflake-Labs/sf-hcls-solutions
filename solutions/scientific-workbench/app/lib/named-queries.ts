@@ -64,7 +64,7 @@ export type NamedQuery = StaticNamedQuery | ParameterizedNamedQuery
 // ---------------------------------------------------------------------------
 
 const WORKBENCH_SCHEMAS = new Set([
-  "CATALOG", "WORKFLOWS", "GOVERNANCE", "PROVENANCE", "PROJECTS",
+  "CATALOG", "WORKFLOWS", "GOVERNANCE", "PROVENANCE", "PROJECTS", "RESULTS",
 ]) as ReadonlySet<string>
 
 const RESULT_SCHEMAS = new Set([

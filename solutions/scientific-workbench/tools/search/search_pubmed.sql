@@ -26,8 +26,16 @@ AS
 $$
 import json
 
-SERVICE = 'SCIENTIFIC_WORKBENCH.CATALOG.PUBMED_CKE_SEARCH'
-COLUMNS = ['PMID', 'TITLE', 'AUTHORS', 'JOURNAL', 'YEAR', 'ABSTRACT_EXCERPT']
+# ── CKE service discovery ────────────────────────────────────────────────────
+# The PubMed CKE is installed as a separate Marketplace database.  The actual
+# fully-qualified service name depends on what the subscriber named the
+# database.  The deploy script writes it to a config row so this procedure
+# reads it at runtime rather than hard-coding it.
+# Fallback order:
+#   1. SCIENTIFIC_WORKBENCH.CATALOG.CKE_CONFIG row (set by deploy)
+#   2. Well-known default: PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM.PUBMED_CKE
+DEFAULT_SERVICE = 'PUBMED_BIOMEDICAL_RESEARCH_CORPUS.OA_COMM.PUBMED_CKE'
+COLUMNS = ['PMID', 'TITLE', 'CITATION', 'CHUNK']
 
 def _search(session, service, request):
     """Call Cortex Search. Bind parameters, never string interpolation."""
@@ -50,15 +58,26 @@ def _unavailable(service, detail):
         'detail': detail[:300],
     })
 
+def _resolve_service(session):
+    """Read the CKE service name from config, or fall back to the well-known default."""
+    try:
+        rows = session.sql(
+            "SELECT SERVICE_FQN FROM SCIENTIFIC_WORKBENCH.CATALOG.CKE_CONFIG "
+            "WHERE CKE_NAME = 'PUBMED' AND ACTIVE = TRUE LIMIT 1"
+        ).collect()
+        if rows and rows[0][0]:
+            return rows[0][0]
+    except Exception:
+        pass
+    return DEFAULT_SERVICE
+
 def run(session, query: str, max_results: int) -> str:
     if not query or not str(query).strip():
         return json.dumps({'status': 'error', 'message': 'query is required'})
 
+    service = _resolve_service(session)
     limit = max(1, min(int(max_results or 5), 100))
 
-    # Try with an explicit column list, then fall back to the service default.
-    # A CKE's column names are set by its publisher, so a mismatch must degrade
-    # rather than fail outright.
     attempts = [
         json.dumps({'query': str(query), 'columns': COLUMNS, 'limit': limit}),
         json.dumps({'query': str(query), 'limit': limit}),
@@ -67,12 +86,12 @@ def run(session, query: str, max_results: int) -> str:
     last = ''
     for request in attempts:
         try:
-            payload = _search(session, SERVICE, request)
+            payload = _search(session, service, request)
         except Exception as e:
             last = str(e)
             low = last.lower()
             if 'does not exist' in low or 'not authorized' in low or 'unknown' in low:
-                return _unavailable(SERVICE, last)
+                return _unavailable(service, last)
             continue
 
         results = payload.get('results') or []

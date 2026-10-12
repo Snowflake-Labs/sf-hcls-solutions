@@ -11,6 +11,7 @@ interface NotebookEntry {
   size: number
   last_modified: string
   workspace: string
+  snowsight_url: string | null
 }
 
 const ICON_MAP: Record<string, string> = {
@@ -37,14 +38,7 @@ function formatName(name: string): string {
     .join(" ")
 }
 
-function getWorkspaceUrl(workspace: string): string | null {
-  if (typeof window === "undefined") return null
-  const host = window.location.hostname
-  const appPart = host.split(".")[0]
-  const match = appPart.match(/[a-z\d]+-(.+)/)
-  const orgAccount = match ? match[1] : appPart
-  return `https://app.snowflake.com/${orgAccount}/projects/workspaces`
-}
+
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -138,7 +132,7 @@ export default function NotebooksPage() {
       {!loading && notebooks.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
           {notebooks.map((nb) => {
-            const url = getWorkspaceUrl(nb.workspace)
+            const url = nb.snowsight_url
             return (
               <div
                 key={nb.name}
@@ -167,7 +161,7 @@ export default function NotebooksPage() {
                       onClick={(e) => e.stopPropagation()}
                       style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--sf-blue)", textDecoration: "none" }}
                     >
-                      <ExternalLink size={12} /> Open in Workspaces
+                      <ExternalLink size={12} /> Open in Snowsight
                     </a>
                   ) : (
                     <span style={{ fontSize: 11, color: "var(--sf-text-muted)", fontStyle: "italic" }}>No link available</span>

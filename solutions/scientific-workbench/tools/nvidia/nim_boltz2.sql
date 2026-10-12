@@ -37,8 +37,21 @@ COMMENT='TOOL:{\"display_name\":\"Boltz-2 — Structure + Affinity\",\"descripti
 EXECUTE AS OWNER
 AS
 $$
-import json, requests, _snowflake, pandas as pd
+import json, re, requests, _snowflake, pandas as pd
 from snowflake.snowpark.context import get_active_session
+
+ALLOWED_DB_SCHEMA = 'SCIENTIFIC_WORKBENCH.RESULTS'
+_SAFE_ID = re.compile(r'^[A-Z][A-Z0-9_]{0,254}$')
+
+def _validate_output_table(name: str) -> str:
+    upper = name.strip().upper().replace('"', '')
+    parts = upper.split('.')
+    bare = parts[-1] if len(parts) in (1, 3) else ''
+    if len(parts) == 3 and '.'.join(parts[:2]) != ALLOWED_DB_SCHEMA:
+        raise ValueError(f'output_table must be in {ALLOWED_DB_SCHEMA}')
+    if not bare or not _SAFE_ID.match(bare):
+        raise ValueError(f'output_table identifier must be uppercase alphanumeric/underscore, got: {name}')
+    return f'{ALLOWED_DB_SCHEMA}.{bare}'
 
 HOSTED_ENDPOINT = 'https://health.api.nvidia.com/v1/biology/mit/boltz2/predict'
 SPCS_PATH = '/biology/mit/boltz2/predict'
@@ -57,6 +70,7 @@ def _get_endpoint(session):
     return HOSTED_ENDPOINT
 
 def run(session, protein_sequence: str, ligand_smiles: str, task: str, output_table: str) -> str:
+    output_table = _validate_output_table(output_table)
     api_key = _snowflake.get_generic_secret_string('nvidia_key')
     endpoint = _get_endpoint(session)
 
@@ -123,7 +137,9 @@ def run(session, protein_sequence: str, ligand_smiles: str, task: str, output_ta
         'STRUCTURE_MMCIF': str(structure_mmcif)[:50000] if structure_mmcif else None
     }]
 
-    result_sp = session.create_dataframe(pd.DataFrame(rows))
+    if not rows:
+        return f'WARNING: No results to write — API returned empty data.'
+    result_sp = session.create_dataframe(rows)
     result_sp.write.mode('overwrite').save_as_table(output_table)
 
     score_str = f'pLDDT={complex_plddt:.3f}' if complex_plddt is not None else 'no confidence'
